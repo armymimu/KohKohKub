@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เช็คเลขบัญชีคนโกง ก่อนโอนเงิน — เช็คก่อนโอน</title>
+<meta name="description" content="วางเลขบัญชีที่เขาให้โอน รู้ทันทีว่าเคยมีคนถามถึงบัญชีนี้มาก่อนไหม พร้อมลิงก์ตรวจสอบรายชื่อคนโกง ใช้ฟรีผ่านไลน์ ตอบใน 3 วินาที">
+<meta name="keywords" content="เช็คเลขบัญชีคนโกง,ตรวจสอบบัญชีคนโกง,เช็คบัญชีม้า,โดนโกงออนไลน์,เช็คก่อนโอน,ที่พักปลอม">
+<meta property="og:title" content="เช็คเลขบัญชีคนโกง ก่อนโอนเงิน">
+<meta property="og:description" content="วางเลขบัญชี รู้ทันทีว่าควรโอนหรือควรหยุด ใช้ฟรีผ่านไลน์">
+<meta property="og:type" content="website">
+<link rel="canonical" href="/">
+<style>
+  :root { --ink:#141b24; --muted:#5f6b7a; --line:#e2e7ee; --brand:#0a7d5a; --lineGreen:#06c755; --danger:#c0392b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI","Noto Sans Thai",Tahoma,sans-serif;
+         color:var(--ink); background:#fff; line-height:1.65; }
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 18px; }
+  header { background: linear-gradient(160deg,#0a7d5a,#0d5561); color:#fff; padding: 48px 0 42px; text-align:center; }
+  h1 { font-size: 30px; margin: 0 0 12px; line-height:1.32; }
+  .lead { font-size: 17px; opacity:.95; margin: 0 0 26px; }
+  .cta { display:inline-block; background: var(--lineGreen); color:#fff; text-decoration:none;
+         font-size:18px; font-weight:800; padding:15px 32px; border-radius:99px; }
+  .cta.sec { background: rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.4); font-size:14px; padding:11px 20px; margin-top:12px; }
+  .stat { margin-top:22px; font-size:14px; opacity:.9; }
+  h2 { font-size:21px; margin:38px 0 12px; }
+  h3 { font-size:17px; margin:24px 0 6px; }
+  .chat { border:1px solid var(--line); border-radius:14px; padding:16px; background:#f8fafb; margin:20px 0; }
+  .bubble { background:#fff; border:1px solid var(--line); border-radius:12px; padding:11px 14px; margin-bottom:10px; font-size:15px; }
+  .bubble.me { background:#dcf7c5; border-color:#c6ebac; margin-left:40px; }
+  .bubble b { display:block; margin-bottom:2px; }
+  .grid { display:grid; grid-template-columns:1fr; gap:12px; margin:18px 0; }
+  .box { border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .box b { display:block; margin-bottom:4px; }
+  .warn { background:#fff8ec; border:1px solid #f0d9ae; border-radius:12px; padding:16px; font-size:15px; margin:24px 0; }
+  .red { background:#fdecec; border:1px solid #f3bcbc; border-radius:12px; padding:16px; font-size:15px; margin:24px 0; }
+  ul { padding-left:20px; } li { margin-bottom:7px; }
+  .owner { background:#eef6f3; border-radius:14px; padding:20px; margin:32px 0; }
+  a { color: var(--brand); }
+  footer { border-top:1px solid var(--line); margin-top:44px; padding:24px 0 44px; color:var(--muted); font-size:14px; }
+  nav.links { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>เช็คเลขบัญชี<br>ก่อนโอนเงิน</h1>
+    <p class="lead">วางเลขบัญชีที่เขาให้โอน<br>รู้ทันทีว่าควรโอน หรือควรหยุด — ฟรี</p>
+    <a class="cta" id="addFriend" href="#">➕ เพิ่มเพื่อนใน LINE</a>
+    <div><a class="cta sec" href="#" id="searchHint" style="display:none"></a></div>
+    <div class="stat" id="stat"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>ทำงานยังไง</h2>
+  <p>ทุกครั้งที่มีคนเอาเลขบัญชีมาเช็ก ระบบจดไว้ว่าเคยเห็นเลขนั้น ครั้งต่อไปจึงตอบได้ว่าบัญชีนั้นเคยมีคนถามถึงมาก่อนกี่ครั้ง ครั้งแรกเมื่อไหร่</p>
+
+  <div class="chat">
+    <div class="bubble me">จะโอนมัดจำ 999-9-88877-6</div>
+    <div class="bubble"><b>🆕 ไม่เคยมีใครถามถึงเลขบัญชีนี้มาก่อน</b>
+      บัญชีของร้านที่เปิดขายมานาน มักมีคนเคยถามมาก่อนแล้ว ให้ระวังเป็นพิเศษ</div>
+    <div class="bubble"><b>🔎 กดตรวจสอบเลขบัญชีนี้ต่อได้เลย</b>
+      ค้นทั้งอินเทอร์เน็ต · เว็บรวมรายชื่อคนโกง · ระบบตำรวจ</div>
+  </div>
+
+  <h2>สัญญาณที่ระบบจับได้</h2>
+  <div class="grid">
+    <div class="box"><b>🆕 ไม่เคยมีใครถามเลขนี้</b>บัญชีเพิ่งเปิดหรือเพิ่งเอามาใช้หลอก — บัญชีร้านจริงที่ขายมานาน มักเคยมีคนเช็กแล้ว</div>
+    <div class="box"><b>🚨 ถูกถาม 5 ครั้งขึ้นไปใน 14 วัน</b>รูปแบบของการหว่านหลอกหลายคนพร้อมกัน</div>
+    <div class="box"><b>📊 ถูกถามกระจายตัวเกิน 4 เดือน</b>ลักษณะของบัญชีที่ใช้ทำมาหากินจริงมานาน</div>
+  </div>
+
+  <h2>ใช้กับอะไรได้บ้าง</h2>
+  <ul>
+    <li>จองที่พัก รีสอร์ท โฮมสเตย์ ที่ให้โอนมัดจำก่อน</li>
+    <li>ซื้อของออนไลน์ พรีออเดอร์ หิ้วของ</li>
+    <li>เช่ารถ จองรถตู้ จองทัวร์</li>
+    <li>ซื้อตั๋วคอนเสิร์ต ตั๋วเครื่องบินต่อจากคนอื่น</li>
+    <li>ทุกกรณีที่ต้องโอนเงินให้คนที่ไม่เคยเจอหน้า</li>
+  </ul>
+
+  <div class="warn">
+    <b>⚠️ อ่านก่อนใช้</b><br>
+    เป็นตัวช่วยตรวจเบื้องต้น ไม่ใช่การรับประกัน<br>
+    "ไม่พบข้อมูล" ไม่ได้แปลว่าเป็นมิจฉาชีพ อาจแค่ยังไม่มีใครเคยเช็ก<br>
+    "พบข้อมูล" ก็ยังต้องตรวจซ้ำก่อนโอนทุกครั้ง
+  </div>
+
+  <h2>ก่อนโอนเงิน ทำ 6 ข้อนี้เสมอ</h2>
+  <ul>
+    <li>ขอวิดีโอคอลให้เห็นของจริงหรือห้องจริงแบบสด ๆ</li>
+    <li>ชื่อบัญชีต้องสอดคล้องกับชื่อร้านหรือเจ้าของ ไม่ใช่ชื่อคนแปลกหน้า</li>
+    <li>ค้นเลขบัญชีและชื่อบัญชีใน Google ก่อนเสมอ</li>
+    <li>เพจใหม่ ยอดไลก์น้อย รูปน้อย ราคาถูกผิดปกติ = เสี่ยงสูง</li>
+    <li>เร่งให้รีบโอน "ชิ้นสุดท้าย" "ราคานี้วันนี้เท่านั้น" = สัญญาณอันตราย</li>
+    <li>เลือกช่องทางที่มีระบบคืนเงิน หรือจ่ายปลายทาง ดีกว่าโอนตรง</li>
+  </ul>
+
+  <div class="red">
+    <b>โอนไปแล้ว สงสัยโดนโกง?</b><br>
+    ยิ่งแจ้งเร็ว ยิ่งมีโอกาสอายัดบัญชีทัน<br>
+    <a href="/scammed.html"><b>→ ดูขั้นตอนที่ต้องทำทันที</b></a>
+  </div>
+
+  <div class="owner">
+    <b>เป็นเจ้าของร้านหรือที่พัก?</b><br>
+    ลงทะเบียนเลขบัญชีไว้ เพื่อให้ลูกค้าตรวจสอบได้ และไม่ถูกมิจฉาชีพแอบอ้างชื่อคุณไปหลอกคนอื่น<br><br>
+    <a href="/register.html"><b>→ ลงทะเบียนกิจการของคุณ (ฟรี)</b></a>
+  </div>
+
+  <h2>คำถามที่พบบ่อย</h2>
+  <h3>ระบบเก็บเลขบัญชีที่ฉันพิมพ์ไหม</h3>
+  <p>ไม่เก็บ ระบบเก็บเฉพาะค่าแฮชแบบทางเดียวที่ถอดกลับเป็นเลขบัญชีไม่ได้ ใช้เพื่อนับว่าเลขนั้นเคยมีคนถามมาก่อนกี่ครั้งเท่านั้น</p>
+  <h3>ถ้าบอทบอกว่าไม่เคยมีใครถาม แปลว่าเป็นมิจฉาชีพหรือเปล่า</h3>
+  <p>ไม่ใช่ แปลว่ายังไม่มีข้อมูล ร้านเปิดใหม่ที่สุจริตก็ขึ้นแบบนี้ ให้ใช้เป็นสัญญาณให้ตรวจเพิ่ม ไม่ใช่คำตัดสิน</p>
+  <h3>เสียเงินไหม</h3>
+  <p>ไม่เสีย ใช้ฟรีทั้งฝั่งผู้ซื้อและฝั่งร้านที่มาลงทะเบียน</p>
+
+  <footer>
+    <nav class="links">
+      <a href="/">หน้าแรก</a>
+      <a href="/scammed.html">โดนโกงแล้วทำยังไง</a>
+      <a href="/koh-larn.html">ที่พักเกาะล้าน</a>
+      <a href="/register.html">ลงทะเบียนร้าน</a>
+    </nav>
+    แจ้งความออนไลน์ <a href="https://www.thaipoliceonline.go.th">thaipoliceonline.go.th</a> · สายด่วน 1441<br><br>
+    ระบบนี้ไม่เก็บเลขบัญชีที่คุณพิมพ์เข้ามา และไม่ระบุว่าผู้ใดเป็นมิจฉาชีพ
+  </footer>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"ระบบเก็บเลขบัญชีที่พิมพ์เข้าไปไหม","acceptedAnswer":{"@type":"Answer","text":"ไม่เก็บ ระบบเก็บเฉพาะค่าแฮชแบบทางเดียวที่ถอดกลับเป็นเลขบัญชีไม่ได้ ใช้เพื่อนับว่าเลขนั้นเคยมีคนถามมาก่อนกี่ครั้งเท่านั้น"}},
+    {"@type":"Question","name":"ถ้าไม่เคยมีใครถามถึงเลขบัญชีนี้ แปลว่าเป็นมิจฉาชีพหรือไม่","acceptedAnswer":{"@type":"Answer","text":"ไม่ใช่ แปลว่ายังไม่มีข้อมูล ร้านเปิดใหม่ที่สุจริตก็ขึ้นแบบนี้ ให้ใช้เป็นสัญญาณให้ตรวจเพิ่ม ไม่ใช่คำตัดสิน"}},
+    {"@type":"Question","name":"ใช้ฟรีหรือไม่","acceptedAnswer":{"@type":"Answer","text":"ใช้ฟรีทั้งฝั่งผู้ซื้อและฝั่งร้านที่มาลงทะเบียน"}}
+  ]
+}
+</script>
+
+<script>
+fetch('/site-config').then((r) => r.json()).then((c) => {
+  const btn = document.getElementById('addFriend');
+  if (c.addFriendUrl) {
+    btn.href = c.addFriendUrl;
+    const hint = document.getElementById('searchHint');
+    hint.style.display = 'inline-block';
+    hint.textContent = 'หรือค้นหาไอดี ' + c.lineOaId + ' ในแอป LINE';
+    hint.href = c.addFriendUrl;
+  } else {
+    btn.textContent = '➕ เพิ่มเพื่อนใน LINE (ยังไม่ได้ตั้งค่า)';
+    btn.style.opacity = '.6';
+  }
+  const bits = [];
+  if (c.accountCount) bits.push('ตรวจไปแล้ว ' + c.accountCount + ' บัญชี');
+  if (c.queryCount) bits.push(c.queryCount + ' ครั้ง');
+  if (c.verifiedCount) bits.push('ร้านที่ยืนยันแล้ว ' + c.verifiedCount + ' ราย');
+  document.getElementById('stat').textContent = bits.join(' · ');
+}).catch(() => {});
+</script>
+</body>
+</html>

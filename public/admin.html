@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>หน้าผู้ดูแล — รายการรอยืนยัน</title>
+<style>
+  :root { --line: #d8dee6; --ink: #1c2430; --muted: #6b7684; --brand: #0a7d5a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; font-family: -apple-system, "Segoe UI", "Noto Sans Thai", Tahoma, sans-serif;
+         background: #f4f6f8; color: var(--ink); line-height: 1.55; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 14px; }
+  .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+  input { width: 100%; padding: 11px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--line); border-radius: 9px; }
+  button { padding: 10px 16px; font-size: 15px; font-weight: 600; font-family: inherit; border: 0; border-radius: 9px; cursor: pointer; }
+  .primary { background: var(--brand); color: #fff; }
+  .danger { background: #fdecec; color: #a02020; }
+  .neutral { background: #eef1f4; color: var(--ink); }
+  .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  dl { display: grid; grid-template-columns: 130px 1fr; gap: 4px 10px; margin: 0; font-size: 14px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; word-break: break-word; }
+  .badge { display: inline-block; font-size: 12px; padding: 2px 9px; border-radius: 99px; background: #fff4e0; color: #92600a; font-weight: 700; }
+  .empty { color: var(--muted); text-align: center; padding: 30px 0; }
+  .warn { background: #fff8ec; border: 1px solid #f0d9ae; color: #92600a; border-radius: 10px; padding: 12px; font-size: 14px; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>หน้าผู้ดูแล — รายการรอยืนยัน</h1>
+
+  <div class="warn">
+    <b>ก่อนกดยืนยัน ต้องตรวจอย่างน้อยนี้</b><br>
+    1. โทรตามเบอร์ที่แจ้ง คุยกับเจ้าของจริง<br>
+    2. ชื่อบัญชี ต้องสอดคล้องกับชื่อที่พักหรือชื่อเจ้าของที่ยืนยันตัวตนได้<br>
+    3. ดูเพจ Facebook ว่ามีอายุ มีรีวิว มีรูปจริง<br>
+    4. ขอวิดีโอคอลให้เห็นหน้าร้าน/ที่พักจริง แบบสด ๆ
+  </div>
+
+  <div class="card">
+    <label for="key" style="font-weight:600;font-size:14px;display:block;margin-bottom:6px">รหัสผู้ดูแล (ADMIN_API_KEY)</label>
+    <input id="key" type="password" placeholder="วางรหัสจากไฟล์ .env">
+    <div class="actions"><button class="primary" id="load">ดูรายการที่รอยืนยัน</button></div>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const key = () => $('key').value.trim();
+
+// จำรหัสไว้ในเครื่องเพื่อไม่ต้องพิมพ์ซ้ำ (เก็บเฉพาะเบราว์เซอร์เครื่องนี้)
+$('key').value = sessionStorage.getItem('adminKey') || '';
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key(), ...(options.headers || {}) },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
+}
+
+function field(label, value) {
+  if (!value) return '';
+  return '<dt>' + label + '</dt><dd>' + String(value).replace(/</g, '&lt;') + '</dd>';
+}
+
+function render(items) {
+  const box = $('list');
+  if (!items.length) {
+    box.innerHTML = '<div class="card"><div class="empty">ไม่มีรายการรอยืนยัน</div></div>';
+    return;
+  }
+  box.innerHTML = items.map((r) => {
+    const map = r.gps ? 'https://maps.google.com/?q=' + r.gps.lat + ',' + r.gps.lng : '';
+    return '<div class="card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<b>' + r.name + '</b><span class="badge">รอยืนยัน</span>' +
+      '</div><dl>' +
+        field('รหัส', r.id) +
+        field('ธนาคาร', r.bankName) +
+        field('เลขบัญชี', r.accountNumber) +
+        field('ชื่อบัญชี', r.accountName) +
+        field('โทร', r.phone) +
+        field('เพจ', r.facebookPage) +
+        field('ประเภท', r.category) +
+        field('พื้นที่', r.area) +
+        (map ? field('พิกัด', map) : '') +
+        field('ผู้กรอก', r.reporterName) +
+        field('ความเกี่ยวข้อง', r.reporterRole) +
+        field('ยินยอมเมื่อ', r.consentAt) +
+        field('ฉบับยินยอม', r.consentVersion) +
+        field('ลงทะเบียนเมื่อ', r.createdAt) +
+      '</dl><div class="actions">' +
+        '<button class="primary" onclick="approve(\'' + r.id + '\')">✅ ยืนยัน เผยแพร่</button>' +
+        '<button class="danger" onclick="reject(\'' + r.id + '\')">🗑 ลบทิ้ง</button>' +
+        (map ? '<button class="neutral" onclick="window.open(\'' + map + '\')">ดูแผนที่</button>' : '') +
+      '</div></div>';
+  }).join('');
+}
+
+async function load() {
+  try {
+    sessionStorage.setItem('adminKey', key());
+    const data = await api('/admin/pending');
+    render(data.data);
+  } catch (e) {
+    $('list').innerHTML = '<div class="card"><div class="empty">โหลดไม่สำเร็จ: ' + e.message + '</div></div>';
+  }
+}
+
+async function approve(id) {
+  const by = prompt('ยืนยันโดยใคร? (จะแสดงต่อสาธารณะ)', 'ผู้ดูแลระบบ');
+  if (by === null) return;
+  await api('/admin/verify/' + id, { method: 'PATCH', body: JSON.stringify({ verified: true, verifiedBy: by }) });
+  load();
+}
+
+async function reject(id) {
+  if (!confirm('ลบรายการ ' + id + ' ถาวร? กู้คืนไม่ได้')) return;
+  await api('/admin/' + id, { method: 'DELETE' });
+  load();
+}
+
+$('load').addEventListener('click', load);
+if (key()) load();
+</script>
+</body>
+</html>

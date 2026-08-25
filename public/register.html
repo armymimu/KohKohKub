@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ลงทะเบียนผู้ขาย — เช็คก่อนโอน</title>
+<style>
+  :root { --line: #d8dee6; --ink: #1c2430; --muted: #6b7684; --brand: #0a7d5a; --warn: #b45309; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px;
+    font-family: -apple-system, "Segoe UI", "Noto Sans Thai", Tahoma, sans-serif;
+    background: #f4f6f8; color: var(--ink); line-height: 1.6;
+  }
+  .card { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  label { display: block; font-weight: 600; font-size: 14px; margin: 16px 0 6px; }
+  .req::after { content: " *"; color: #c0392b; }
+  .hint { font-weight: 400; color: var(--muted); font-size: 13px; display: block; margin-top: 2px; }
+  input, select, textarea {
+    width: 100%; padding: 11px 12px; font-size: 16px; font-family: inherit;
+    border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--ink);
+  }
+  input:focus, select:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: var(--brand); }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  button {
+    width: 100%; padding: 14px; font-size: 16px; font-weight: 700; font-family: inherit;
+    background: var(--brand); color: #fff; border: 0; border-radius: 9px; cursor: pointer; margin-top: 22px;
+  }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.ghost { background: #eef1f4; color: var(--ink); font-weight: 600; font-size: 14px; padding: 10px; margin-top: 6px; }
+  .consent { margin-top: 22px; padding: 14px; background: #f8fafb; border: 1px solid var(--line); border-radius: 10px; }
+  .consent label { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 14px; margin: 0; }
+  .consent input[type=checkbox] { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 2px; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--brand); font-size: 14px; font-weight: 600; }
+  pre { white-space: pre-wrap; font-family: inherit; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .note { background: #fff8ec; border: 1px solid #f0d9ae; border-radius: 10px; padding: 12px; font-size: 14px; color: var(--warn); margin-bottom: 18px; }
+  #result { margin-top: 18px; padding: 14px; border-radius: 10px; font-size: 15px; display: none; }
+  #result.ok { display: block; background: #e9f7f1; border: 1px solid #a8dcc6; color: #0a5c43; }
+  #result.err { display: block; background: #fdecec; border: 1px solid #f3bcbc; color: #a02020; }
+  .hp { position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>ลงทะเบียนกิจการของคุณ</h1>
+  <p class="sub">เพื่อให้ลูกค้าตรวจสอบได้ว่าเลขบัญชีที่โอนเป็นของคุณจริง และไม่ถูกมิจฉาชีพแอบอ้างชื่อ</p>
+
+  <div class="note">
+    <b>ลงทะเบียนแล้วยังไม่ขึ้นระบบทันที</b><br>
+    ผู้ดูแลจะติดต่อกลับเพื่อตรวจสอบก่อน เมื่อผ่านแล้วลูกค้าจึงจะค้นเจอ
+  </div>
+
+  <form id="f">
+    <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+    <label class="req" for="name">ชื่อร้าน / ที่พัก / กิจการ</label>
+    <input id="name" name="name" required placeholder="ชื่อที่ลูกค้าใช้เรียกคุณ">
+
+    <label for="aliases">ชื่ออื่นที่คนเรียก
+      <span class="hint">ถ้ามีหลายชื่อ คั่นด้วยจุลภาค เช่น ชื่อภาษาอังกฤษ ชื่อย่อ</span>
+    </label>
+    <input id="aliases" name="aliases" placeholder="baan rimhad, บ้านริมหาด">
+
+    <label class="req" for="bankName">ธนาคาร</label>
+    <select id="bankName" name="bankName" required>
+      <option value="">— เลือกธนาคาร —</option>
+      <option>ธนาคารกสิกรไทย</option>
+      <option>ธนาคารไทยพาณิชย์</option>
+      <option>ธนาคารกรุงไทย</option>
+      <option>ธนาคารกรุงเทพ</option>
+      <option>ธนาคารกรุงศรีอยุธยา</option>
+      <option>ธนาคารทหารไทยธนชาต</option>
+      <option>ธนาคารออมสิน</option>
+      <option>ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร</option>
+      <option>ธนาคารซีไอเอ็มบีไทย</option>
+      <option>ธนาคารเกียรตินาคินภัทร</option>
+      <option>ธนาคารยูโอบี</option>
+      <option>ธนาคารแลนด์ แอนด์ เฮ้าส์</option>
+      <option>ธนาคารอิสลามแห่งประเทศไทย</option>
+      <option>อื่น ๆ</option>
+    </select>
+
+    <label class="req" for="accountNumber">เลขบัญชีที่ใช้รับโอน</label>
+    <input id="accountNumber" name="accountNumber" required inputmode="numeric" placeholder="123-4-56789-0">
+
+    <label class="req" for="accountName">ชื่อบัญชี
+      <span class="hint">ต้องตรงกับที่ปรากฏในสมุดบัญชี/แอปธนาคารเป๊ะ ๆ</span>
+    </label>
+    <input id="accountName" name="accountName" required placeholder="นาย สมชาย ใจดี หรือ บริษัท ... จำกัด">
+
+    <label class="req" for="phone">เบอร์โทรติดต่อ</label>
+    <input id="phone" name="phone" required inputmode="tel" placeholder="081-234-5678">
+
+    <label for="facebookPage">เพจ Facebook</label>
+    <input id="facebookPage" name="facebookPage" placeholder="https://www.facebook.com/yourpage">
+
+    <label class="req" for="category">ประเภทกิจการ</label>
+    <select id="category" name="category" required>
+      <option value="">— เลือก —</option>
+    </select>
+
+    <label for="area">พื้นที่ / จังหวัด
+      <span class="hint">เช่น หาดตาแหวน เกาะล้าน ชลบุรี</span>
+    </label>
+    <input id="area" name="area" placeholder="อำเภอ จังหวัด">
+
+    <label for="lat">พิกัดที่ตั้ง
+      <span class="hint">ถ้ากรอกฟอร์มนี้ขณะอยู่ที่ร้าน กดปุ่มด้านล่างได้เลย</span>
+    </label>
+    <div class="row">
+      <input id="lat" name="lat" inputmode="decimal" placeholder="ละติจูด 12.9297">
+      <input id="lng" name="lng" inputmode="decimal" placeholder="ลองจิจูด 100.7817">
+    </div>
+    <button type="button" class="ghost" id="gps">📍 ใช้ตำแหน่งปัจจุบันของฉัน</button>
+
+    <label class="req" for="reporterName">ชื่อผู้กรอกข้อมูล</label>
+    <input id="reporterName" name="reporterName" required placeholder="ชื่อ-นามสกุล">
+
+    <label class="req" for="reporterRole">เกี่ยวข้องกับกิจการอย่างไร</label>
+    <select id="reporterRole" name="reporterRole" required>
+      <option value="">— เลือก —</option>
+      <option>เจ้าของกิจการ</option>
+      <option>ผู้จัดการ / ผู้ดูแล</option>
+      <option>พนักงาน</option>
+      <option>ได้รับมอบหมายจากเจ้าของ</option>
+    </select>
+
+    <div class="consent">
+      <label>
+        <input type="checkbox" id="consent" name="consent" required>
+        <span id="shortConsent">กำลังโหลดข้อความยินยอม...</span>
+      </label>
+      <details>
+        <summary>อ่านหนังสือยินยอมฉบับเต็ม</summary>
+        <pre id="fullConsent">กำลังโหลด...</pre>
+      </details>
+    </div>
+
+    <button type="submit" id="submit">ส่งข้อมูลลงทะเบียน</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+// ดึงข้อความยินยอมจากเซิร์ฟเวอร์ เพื่อให้แก้ที่เดียวแล้วเปลี่ยนทุกที่
+fetch('/consent')
+  .then((r) => r.json())
+  .then((d) => {
+    $('shortConsent').textContent = d.short;
+    $('fullConsent').textContent = d.full;
+  })
+  .catch(() => { $('shortConsent').textContent = 'โหลดข้อความยินยอมไม่สำเร็จ กรุณารีเฟรชหน้า'; });
+
+// รายการประเภทกิจการมาจากเซิร์ฟเวอร์ (แก้ที่ src/config.js ที่เดียว)
+fetch('/site-config')
+  .then((r) => r.json())
+  .then((c) => {
+    (c.categories || []).forEach((name) => {
+      const opt = document.createElement('option');
+      opt.textContent = name;
+      $('category').appendChild(opt);
+    });
+  })
+  .catch(() => {});
+
+$('gps').addEventListener('click', () => {
+  if (!navigator.geolocation) return alert('อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง');
+  $('gps').textContent = 'กำลังหาตำแหน่ง...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      $('lat').value = pos.coords.latitude.toFixed(6);
+      $('lng').value = pos.coords.longitude.toFixed(6);
+      $('gps').textContent = '📍 ได้ตำแหน่งแล้ว (กดอีกครั้งเพื่อวัดใหม่)';
+    },
+    () => { $('gps').textContent = '📍 ใช้ตำแหน่งปัจจุบันของฉัน'; alert('หาตำแหน่งไม่สำเร็จ กรุณาอนุญาตการเข้าถึงตำแหน่ง หรือกรอกเอง'); },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+});
+
+$('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const box = $('result');
+  const btn = $('submit');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่ง...';
+
+  const form = new FormData($('f'));
+  const lat = parseFloat(form.get('lat'));
+  const lng = parseFloat(form.get('lng'));
+
+  const payload = {
+    name: form.get('name'),
+    aliases: String(form.get('aliases') || '').split(',').map((s) => s.trim()).filter(Boolean),
+    bankName: form.get('bankName'),
+    accountNumber: form.get('accountNumber'),
+    accountName: form.get('accountName'),
+    phone: form.get('phone'),
+    facebookPage: form.get('facebookPage'),
+    area: form.get('area'),
+    category: form.get('category'),
+    gps: (isFinite(lat) && isFinite(lng)) ? { lat, lng } : undefined,
+    reporterName: form.get('reporterName'),
+    reporterRole: form.get('reporterRole'),
+    consent: form.get('consent') === 'on',
+    website: form.get('website'),
+  };
+
+  try {
+    const res = await fetch('/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      box.className = 'ok';
+      box.innerHTML = '<b>ส่งข้อมูลเรียบร้อย</b><br>' +
+        'รหัสอ้างอิงของคุณคือ <b>' + data.data.id + '</b> เก็บไว้ใช้ติดตามผล<br><br>' +
+        'สถานะตอนนี้: <b>รอผู้ดูแลตรวจสอบ</b> ยังไม่ปรากฏในระบบค้นหา<br>' +
+        'ผู้ดูแลจะติดต่อกลับตามเบอร์ที่แจ้งไว้';
+      $('f').style.display = 'none';
+    } else {
+      box.className = 'err';
+      box.innerHTML = '<b>ส่งไม่สำเร็จ</b><br>' +
+        (data.errors ? data.errors.join('<br>') : (data.error || 'เกิดข้อผิดพลาด'));
+      btn.disabled = false;
+      btn.textContent = 'ส่งข้อมูลลงทะเบียน';
+    }
+  } catch (err) {
+    box.className = 'err';
+    box.textContent = 'ติดต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่';
+    btn.disabled = false;
+    btn.textContent = 'ส่งข้อมูลลงทะเบียน';
+  }
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+</script>
+</body>
+</html>

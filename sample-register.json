@@ -1,0 +1,11 @@
+{
+  "name": "ทดสอบ ซันไรส์ รีสอร์ท",
+  "bankName": "ธนาคารกสิกรไทย",
+  "accountNumber": "111-2-33344-5",
+  "accountName": "นาย ทดสอบ ระบบ",
+  "facebookPage": "https://www.facebook.com/example.sunrisetest",
+  "phone": "081-234-5678",
+  "gps": { "lat": 12.9297, "lng": 100.7817 },
+  "beach": "หาดตาแหวน",
+  "aliases": ["ซันไรส์", "sunrise resort"]
+}

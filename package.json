@@ -1,0 +1,20 @@
+{
+  "name": "check-before-pay-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LINE bot ตรวจเลขบัญชีก่อนโอนเงิน ป้องกันมิจฉาชีพ",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^9.5.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
