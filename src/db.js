@@ -1,22 +1,16 @@
-/**
- * ฐานข้อมูลแบบง่าย: เก็บเป็นไฟล์ JSON ไฟล์เดียว (data/db.json)
- *
- * ครั้งแรกที่รัน ถ้ายังไม่มี data/db.json จะคัดลอกข้อมูลตัวอย่าง
- * จาก src/data/accommodations.seed.json มาให้อัตโนมัติ
- *
- * ถ้าวันหลังอยากย้ายไป SQLite / Postgres ให้แก้เฉพาะไฟล์นี้ไฟล์เดียว
- * ส่วนที่เหลือของโปรแกรมเรียกใช้ผ่านฟังก์ชันข้างล่างนี้เท่านั้น
+﻿/**
+ * ฐานข้อมูล: รองรับทั้ง PostgreSQL (เมื่อ deploy บน Railway) และ Local JSON Fallback
  */
 
 const fs = require('fs');
 const path = require('path');
+const { pool, isPostgres } = require('./postgres');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const SEED_FILE = path.join(__dirname, 'data', 'accommodations.seed.json');
 
 let cache = null;
-// กันเขียนไฟล์ชนกันเวลามีหลาย request พร้อมกัน: ต่อคิวเขียนเป็นสายเดียว
 let writeQueue = Promise.resolve();
 
 function readSeed() {
@@ -25,41 +19,67 @@ function readSeed() {
   return { accommodations: seed.accommodations || [] };
 }
 
-function load() {
+function loadLocal() {
   if (cache) return cache;
-
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
   if (fs.existsSync(DB_FILE)) {
-    cache = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-    if (!Array.isArray(cache.accommodations)) cache.accommodations = [];
+    try {
+      cache = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    } catch (e) {
+      cache = readSeed();
+    }
   } else {
     cache = readSeed();
     fs.writeFileSync(DB_FILE, JSON.stringify(cache, null, 2), 'utf8');
-    console.log(`[db] สร้าง ${DB_FILE} จากข้อมูลตัวอย่าง (${cache.accommodations.length} รายการ)`);
   }
-
+  if (!Array.isArray(cache.accommodations)) cache.accommodations = [];
   return cache;
 }
 
-function persist() {
-  const snapshot = JSON.stringify(load(), null, 2);
-  writeQueue = writeQueue.then(async () => {
-    const tmp = `${DB_FILE}.tmp`;
-    await fs.promises.writeFile(tmp, snapshot, 'utf8');
-    await fs.promises.rename(tmp, DB_FILE); // เขียนทับแบบ atomic กันไฟล์พัง
-  });
-  return writeQueue;
+async function syncFromPostgres() {
+  if (!isPostgres()) return loadLocal();
+  try {
+    const res = await pool.query('SELECT * FROM accommodations ORDER BY id ASC');
+    const list = res.rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      aliases: Array.isArray(r.aliases) ? r.aliases : (typeof r.aliases === 'string' ? JSON.parse(r.aliases) : []),
+      bankName: r.bank_name || '',
+      accountNumber: r.account_number || '',
+      accountName: r.account_name || '',
+      facebookPage: r.facebook_page || '',
+      phone: r.phone || '',
+      gps: r.gps,
+      area: r.area || '',
+      category: r.category || '',
+      verified: r.verified === true,
+      verifiedAt: r.verified_at,
+      verifiedBy: r.verified_by,
+      reporterName: r.reporter_name,
+      reporterRole: r.reporter_role,
+      consentAt: r.consent_at,
+      consentVersion: r.consent_version,
+      consentIp: r.consent_ip,
+      createdAt: r.created_at,
+    }));
+    cache = { accommodations: list };
+    return cache;
+  } catch (err) {
+    console.error('[db] Error syncing from Postgres:', err);
+    return loadLocal();
+  }
 }
 
-/** คืนรายการที่พักทั้งหมด */
+function load() {
+  if (!cache) loadLocal();
+  return cache;
+}
+
 function all() {
   return load().accommodations;
 }
 
-/** คืนเฉพาะรายการที่ยืนยันแล้ว */
 function verified() {
   return all().filter((item) => item.verified === true);
 }
@@ -76,41 +96,122 @@ function nextId() {
   return `KL-${String(max + 1).padStart(3, '0')}`;
 }
 
-/**
- * เพิ่มที่พักใหม่
- * สำคัญ: ของใหม่จะเป็น verified:false เสมอ ต้องมีคนตรวจสอบก่อนถึงจะยืนยัน
- * (ถ้าเปิดให้ลงทะเบียนแล้วยืนยันเองอัตโนมัติ มิจฉาชีพจะมาลงทะเบียนเองได้)
- */
 async function insert(record) {
-  const db = load();
   const item = {
     id: nextId(),
     verified: false,
     createdAt: new Date().toISOString(),
     ...record,
   };
-  db.accommodations.push(item);
-  await persist();
+
+  load().accommodations.push(item);
+
+  if (isPostgres()) {
+    try {
+      await pool.query(
+        `INSERT INTO accommodations 
+          (id, name, aliases, bank_name, account_number, account_name, facebook_page, phone, gps, area, category, verified, verified_at, verified_by, reporter_name, reporter_role, consent_at, consent_version, consent_ip, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+        [
+          item.id,
+          item.name,
+          JSON.stringify(item.aliases || []),
+          item.bankName || '',
+          item.accountNumber || '',
+          item.accountName || '',
+          item.facebookPage || '',
+          item.phone || '',
+          item.gps ? JSON.stringify(item.gps) : null,
+          item.area || '',
+          item.category || '',
+          item.verified === true,
+          item.verifiedAt || null,
+          item.verifiedBy || null,
+          item.reporterName || null,
+          item.reporterRole || null,
+          item.consentAt || null,
+          item.consentVersion || null,
+          item.consentIp || null,
+          item.createdAt,
+        ]
+      );
+    } catch (e) {
+      console.error('[db] Postgres insert error:', e);
+    }
+  }
+
+  // Local snapshot backup
+  writeQueue = writeQueue.then(async () => {
+    try {
+      const tmp = `${DB_FILE}.tmp`;
+      await fs.promises.writeFile(tmp, JSON.stringify(load(), null, 2), 'utf8');
+      await fs.promises.rename(tmp, DB_FILE);
+    } catch (e) {}
+  });
+
   return item;
 }
 
-/** ใช้ตอนแอดมินกดยืนยัน/แก้ไขข้อมูล */
 async function update(id, patch) {
   const item = findById(id);
   if (!item) return null;
   Object.assign(item, patch, { updatedAt: new Date().toISOString() });
-  await persist();
+
+  if (isPostgres()) {
+    try {
+      await pool.query(
+        `UPDATE accommodations SET 
+          verified = $1, verified_at = $2, verified_by = $3, updated_at = NOW()
+         WHERE id = $4`,
+        [item.verified === true, item.verifiedAt || null, item.verifiedBy || null, id]
+      );
+    } catch (e) {
+      console.error('[db] Postgres update error:', e);
+    }
+  }
+
+  writeQueue = writeQueue.then(async () => {
+    try {
+      const tmp = `${DB_FILE}.tmp`;
+      await fs.promises.writeFile(tmp, JSON.stringify(load(), null, 2), 'utf8');
+      await fs.promises.rename(tmp, DB_FILE);
+    } catch (e) {}
+  });
+
   return item;
 }
 
-/** ลบรายการถาวร ใช้ตอนแอดมินปฏิเสธ หรือเจ้าของขอถอนความยินยอม */
 async function remove(id) {
-  const db = load();
-  const index = db.accommodations.findIndex((item) => item.id === id);
+  const index = load().accommodations.findIndex((item) => item.id === id);
   if (index === -1) return false;
-  db.accommodations.splice(index, 1);
-  await persist();
+  load().accommodations.splice(index, 1);
+
+  if (isPostgres()) {
+    try {
+      await pool.query('DELETE FROM accommodations WHERE id = $1', [id]);
+    } catch (e) {
+      console.error('[db] Postgres delete error:', e);
+    }
+  }
+
+  writeQueue = writeQueue.then(async () => {
+    try {
+      const tmp = `${DB_FILE}.tmp`;
+      await fs.promises.writeFile(tmp, JSON.stringify(load(), null, 2), 'utf8');
+      await fs.promises.rename(tmp, DB_FILE);
+    } catch (e) {}
+  });
+
   return true;
 }
 
-module.exports = { all, verified, findById, insert, update, remove, DB_FILE };
+module.exports = {
+  all,
+  verified,
+  findById,
+  insert,
+  update,
+  remove,
+  syncFromPostgres,
+  DB_FILE,
+};

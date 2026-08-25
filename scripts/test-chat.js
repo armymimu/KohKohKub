@@ -8,23 +8,26 @@ const samples = process.argv.slice(2).length
       'tawaen seaview',
       '123-4-56789-0',
       '1234567890',
-      'จะโอนมัดจำให้ 999-9-99999-9 ชื่อ นายมิจฉาชีพ',
+      'จะโอนมัดจำให้ 999-9-99999-9 โทร 081-999-8888 line @scammer99',
       'งานกดไลก์ ภารกิจรับเงิน',
       'รีสอร์ทลุงโกงแน่นอน',
       'รายการ',
       'ช่วยเหลือ',
     ];
 
-for (const text of samples) {
-  console.log('\n' + '='.repeat(60));
-  console.log('ผู้ใช้พิมพ์: ' + text);
-  console.log('-'.repeat(60));
-  for (const m of buildReply(text)) {
-    if (m.type === 'flex') {
-      console.log(`[FLEX MESSAGE] ${m.altText}`);
-    } else {
-      console.log(m.text);
+(async () => {
+  for (const text of samples) {
+    console.log('\n' + '='.repeat(60));
+    console.log('ผู้ใช้พิมพ์: ' + text);
+    console.log('-'.repeat(60));
+    const replies = await buildReply(text);
+    for (const m of replies) {
+      if (m.type === 'flex') {
+        console.log(`[FLEX MESSAGE] ${m.altText}`);
+      } else {
+        console.log(m.text);
+      }
+      console.log('---');
     }
-    console.log('---');
   }
-}
+})();
