@@ -8,6 +8,7 @@
 const db = require('./db');
 const { search, extractAccountNumbers } = require('./matcher');
 const sightings = require('./sightings');
+const scam = require('./scampatterns');
 const msg = require('./messages');
 
 const LINE_TEXT_LIMIT = 4900; // ลิมิตจริงคือ 5000 ตัวอักษรต่อข้อความ เผื่อไว้หน่อย
@@ -34,6 +35,22 @@ function buildReply(userText) {
   const risky = msg.hasRiskKeyword(text);
   const result = search(db.all(), text);
   const accounts = extractAccountNumbers(text);
+
+  // --- สแกมหารายได้ (งานเสริม ลงทุน เงินกู้ ดรอปชิป แชร์ลูกโซ่) ---
+  // กลุ่มคนอยากได้เงินเร็วคือกลุ่มที่โดนหลอกหนักที่สุด
+  // ตรงนี้อธิบายกลไกของสแกมแบบนั้นให้เห็นภาพ แทนที่จะเตือนลอย ๆ
+  const scamHit = scam.detect(text);
+  if (scamHit) {
+    replies.push(toTextMessage(scam.warningText(scamHit)));
+
+    if (accounts.length) {
+      const stat = sightings.record(accounts[0]);
+      replies.push(toTextMessage(msg.sightingText(stat)));
+    }
+
+    replies.push(toTextMessage(scam.officialChecks(scamHit.type)));
+    return replies.slice(0, 5);
+  }
 
   // --- กรณีที่ผู้ใช้ส่งเลขบัญชีมา = เคสหลักของระบบ ---
   // ตอบด้วยของที่มีประโยชน์ทันที แม้ยังไม่มีผู้ขายลงทะเบียนแม้แต่รายเดียว

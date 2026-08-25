@@ -117,7 +117,7 @@ app.get('/health', (req, res) => {
 // SEO: บอก Google ว่ามีหน้าอะไรบ้าง และหน้าไหนห้ามเก็บ
 // BASE_URL ต้องตั้งใน .env หลัง deploy เช่น https://xxx.up.railway.app
 // ---------------------------------------------------------------------------
-const PUBLIC_PAGES = ['/', '/scammed.html', '/koh-larn.html', '/register.html'];
+const PUBLIC_PAGES = ['/', '/job-scam.html', '/scammed.html', '/koh-larn.html', '/register.html'];
 
 app.get('/robots.txt', (req, res) => {
   const base = appConfig.baseUrl || `${req.protocol}://${req.get('host')}`;
