@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถิติการใช้งานและความโปร่งใส — เช็คก่อนโอน</title>
+<meta name="description" content="สถิติข้อมูลการตรวจสอบเลขบัญชี จำนวนผู้ใช้งาน และร้านค้าที่ได้รับการยืนยันความปลอดภัยในระบบ">
+<link rel="canonical" href="/stats.html">
+<style>
+  :root { --ink:#141b24; --muted:#5f6b7a; --line:#e2e7ee; --brand:#0a7d5a; --lineGreen:#06c755; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI","Noto Sans Thai",Tahoma,sans-serif; color:var(--ink); background:#fff; line-height:1.65; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 18px; }
+  header { background: linear-gradient(160deg,#0a7d5a,#0d5561); color:#fff; padding: 44px 0 38px; text-align:center; }
+  h1 { font-size: 28px; margin: 0 0 12px; line-height:1.35; }
+  .lead { font-size: 16px; opacity:.95; margin: 0 0 24px; }
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin:28px 0; }
+  .stat-card { background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:20px; text-align:center; }
+  .stat-num { font-size:36px; font-weight:800; color:var(--brand); margin:8px 0; }
+  .stat-label { font-size:14px; color:var(--muted); font-weight:bold; }
+  .cta { display:inline-block; background: var(--lineGreen); color:#fff; text-decoration:none; font-size:17px; font-weight:800; padding:14px 30px; border-radius:99px; }
+  .box-card { border:1px solid var(--line); border-radius:14px; padding:18px; background:#f8fafb; margin:22px 0; }
+  a { color: var(--brand); }
+  footer { border-top:1px solid var(--line); margin-top:44px; padding:24px 0 44px; color:var(--muted); font-size:14px; }
+  nav.links { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>สถิติและความโปร่งใส</h1>
+    <p class="lead">รายงานตัวเลขการตรวจสอบความปลอดภัยของชุมชนแบบ Real-time</p>
+    <a class="cta" id="addFriend" href="#">➕ ทดลองใช้งานใน LINE</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">ยอดตรวจสอบสะสม</div>
+      <div class="stat-num" id="totalQueries">0</div>
+      <div style="font-size:12px;color:var(--muted);">ครั้งที่มีการส่งข้อมูลตรวจ</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">บัญชีในฐานข้อมูลความจำ</div>
+      <div class="stat-num" id="totalAccounts">0</div>
+      <div style="font-size:12px;color:var(--muted);">บัญชีที่เคยมีคนถามถึง</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ที่พัก/ร้านค้ายืนยันแล้ว</div>
+      <div class="stat-num" id="verifiedCount">0</div>
+      <div style="font-size:12px;color:var(--muted);">ตรวจสอบเอกสารถูกต้อง</div>
+    </div>
+  </div>
+
+  <h2>หลักการทำงานเพื่อความเป็นส่วนตัว</h2>
+  <div class="box-card">
+    <p>🔒 <b>ความปลอดภัยระดับสูงสุด:</b> ระบบไม่มีการเก็บเลขบัญชีธนาคารจริงของผู้ใช้งาน ข้อมูลถูกเข้ารหัสแบบทางเดียว (HMAC-SHA256 พร้อม Salt ลับ) ทำให้ไม่สามารถย้อนกลับเป็นเลขบัญชีจริงได้แม้ฐานข้อมูลจะรั่วไหล</p>
+    <p>🛡️ <b>Crowd Intelligence:</b> ความจำร่วมของระบบเติบโตขึ้นทุกครั้งที่มีการใช้งาน ช่วยปกป้องทุกคนในสังคมได้อย่างแม่นยำยิ่งขึ้น</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <nav class="links">
+      <a href="/">หน้าแรก</a>
+      <a href="/check-account.html">เช็คเลขบัญชี</a>
+      <a href="/hotel-scam.html">เตือนภัยที่พักปลอม</a>
+      <a href="/scammed.html">โดนโกงทำยังไง</a>
+      <a href="/stats.html">สถิติระบบ</a>
+      <a href="/register.html">ลงทะเบียนร้านค้า</a>
+    </nav>
+    <p>© 2026 เช็คก่อนโอน — ระบบตรวจสอบความปลอดภัยก่อนทำธุรกรรมออนไลน์</p>
+  </div>
+</footer>
+
+<script>
+fetch('/site-config').then(r=>r.json()).then(c=>{
+  if(c.addFriendUrl){
+    document.querySelectorAll('#addFriend').forEach(el=>el.href=c.addFriendUrl);
+  }
+  document.getElementById('totalQueries').textContent = (c.queryCount || 0).toLocaleString();
+  document.getElementById('totalAccounts').textContent = (c.accountCount || 0).toLocaleString();
+  document.getElementById('verifiedCount').textContent = (c.verifiedCount || 0).toLocaleString();
+}).catch(()=>{});
+</script>
+</body>
+</html>
