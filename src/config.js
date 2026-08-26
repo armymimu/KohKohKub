@@ -24,7 +24,7 @@ module.exports = {
   retention: process.env.DATA_RETENTION || 'ตลอดเวลาที่ผู้ขายยังอยู่ในระบบ และลบภายใน 30 วันหลังถอนความยินยอม',
 
   // ไอดี LINE Official Account เช่น @123abcde (ดูได้ในแท็บ Messaging API)
-  lineOaId: (process.env.LINE_OA_ID || '').trim(),
+  lineOaId: (process.env.LINE_OA_ID || '@206jnkap').trim(),
 
   /**
    * ประเภทของผู้ขายที่ตรวจสอบได้
