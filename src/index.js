@@ -164,10 +164,7 @@ const PUBLIC_PAGES = [
   '/register.html',
 ];
 
-// ยืนยันความเป็นเจ้าของ Google Search Console อัตโนมัติทุกรูปแบบ (HTML File หรือ Meta tag)
-app.get('/google:code.html', (req, res) => {
-  res.type('text/html').send(`google-site-verification: google${req.params.code}.html`);
-});
+
 
 app.get('/stats', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'stats.html'));
