@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CheckBeforePay Drop-in Widget (วิดเจ็ตฝังเว็บและกลุ่ม)
  * ใช้งานง่ายเพียงแปะ: <script src="https://kohkohkub-production.up.railway.app/widget.js"></script>
  */
@@ -26,8 +26,8 @@
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
         <span style="font-size:20px;">🛡️</span>
         <div>
-          <b style="font-size:15px;display:block;">เช็คก่อนโอน — ตรวจเลขบัญชี</b>
-          <span style="font-size:11px;color:#64748b;">ระบบความปลอดภัยชุมชน</span>
+          <b style="font-size:15px;display:block;">Safeโอน (SafeOne)</b>
+          <span style="font-size:11px;color:#64748b;">โอนปลอดภัย ทุกยอดเงิน</span>
         </div>
       </div>
       <div style="display:flex;gap:6px;">

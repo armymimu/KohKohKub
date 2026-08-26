@@ -7,7 +7,8 @@
 
 module.exports = {
   // ชื่อบริการที่แสดงต่อผู้ใช้
-  siteName: process.env.SITE_NAME || 'เช็คก่อนโอน',
+  siteName: process.env.SITE_NAME || 'Safeโอน (SafeOne)',
+  slogan: 'โอนปลอดภัย ทุกยอดเงิน',
 
   // โดเมนจริงหลัง deploy เช่น https://checkbeforepay.up.railway.app
   // ใช้สร้าง sitemap.xml และลิงก์ og: ให้ Google เก็บหน้าเว็บได้ถูกต้อง

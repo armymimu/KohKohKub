@@ -52,7 +52,7 @@ function thaiDate(iso) {
 
 const helpText = () =>
   [
-    `🛡️ ${config.siteName} — ตรวจเลขบัญชีก่อนโอนเงิน`,
+    `🛡️ ${config.siteName} — ${config.slogan}`,
     '',
     'วิธีใช้ — วางสิ่งที่อยากเช็กเข้ามาได้เลย',
     '• เลขบัญชีที่เขาให้โอน เช่น "123-4-56789-0"',
