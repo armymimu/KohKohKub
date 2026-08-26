@@ -3,6 +3,13 @@ const path = require('path');
 
 const publicDir = path.join(__dirname, '..', 'public');
 
+// Create exact HTML file verification too
+fs.writeFileSync(
+  path.join(publicDir, 'googlebekxyZQFU9h4x3o58e7xqFy2l9aZZv5w18AJ9d31zxw.html'),
+  'google-site-verification: googlebekxyZQFU9h4x3o58e7xqFy2l9aZZv5w18AJ9d31zxw.html',
+  'utf8'
+);
+
 function renderPage({ title, metaTitle, desc, keywords, canonical, headerH1, headerLead, contentHtml }) {
   return `<!DOCTYPE html>
 <html lang="th">
@@ -12,6 +19,7 @@ function renderPage({ title, metaTitle, desc, keywords, canonical, headerH1, hea
 <title>${metaTitle}</title>
 <meta name="description" content="${desc}">
 <meta name="keywords" content="${keywords}">
+<meta name="google-site-verification" content="bekxyZQFU9h4x3o58e7xqFy2l9aZZv5w18AJ9d31zxw">
 <meta property="og:title" content="${metaTitle}">
 <meta property="og:description" content="${desc}">
 <meta property="og:type" content="article">
@@ -296,7 +304,7 @@ const pFreeze = renderPage({
 });
 fs.writeFileSync(path.join(publicDir, 'freeze-account.html'), pFreeze, 'utf8');
 
-// 9. stats.html (Public Stats Page)
+// 9. stats.html
 const pStats = `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -304,6 +312,7 @@ const pStats = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>สถิติและความโปร่งใส — Safeโอน (SafeOne)</title>
 <meta name="description" content="สถิติข้อมูลการตรวจสอบเลขบัญชี จำนวนผู้ใช้งาน และร้านค้าที่ได้รับการยืนยันความปลอดภัยในระบบ Safeโอน">
+<meta name="google-site-verification" content="bekxyZQFU9h4x3o58e7xqFy2l9aZZv5w18AJ9d31zxw">
 <link rel="canonical" href="/stats.html">
 <style>
   :root { --ink:#141b24; --muted:#5f6b7a; --line:#e2e7ee; --brand:#0a7d5a; --lineGreen:#06c755; }
@@ -388,4 +397,4 @@ fetch('/site-config').then(r=>r.json()).then(c=>{
 </html>`;
 fs.writeFileSync(path.join(publicDir, 'stats.html'), pStats, 'utf8');
 
-console.log('✅ Successfully updated branding to Safeโอน (SafeOne)!');
+console.log('✅ Generated verification file and all pages with Google Site Verification!');
