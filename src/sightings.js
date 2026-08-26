@@ -20,6 +20,10 @@ function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+function getSaltSource() {
+  return process.env.SIGHTING_SALT ? 'env' : 'ephemeral-file';
+}
+
 function getSalt() {
   if (process.env.SIGHTING_SALT) return process.env.SIGHTING_SALT;
   if (salt) return salt;
@@ -101,4 +105,4 @@ function stats() {
   };
 }
 
-module.exports = { record, stats, hashAccount, getSalt };
+module.exports = { record, stats, hashAccount, getSalt, getSaltSource };

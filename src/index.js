@@ -1,4 +1,4 @@
-﻿/**
+/**
  * เซิร์ฟเวอร์หลัก (Phase 4: Privacy, Security & Anti-Poisoning Architecture)
  */
 
@@ -124,8 +124,24 @@ app.get('/consent', (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => {
-  res.json({ ok: true, accommodations: db.all().length, uptime: process.uptime() });
+app.get('/health', async (req, res) => {
+  const g = await graph.getGraphStats();
+  const s = sightings.stats();
+  const isPg = require('./postgres').isPostgres();
+  res.json({
+    ok: true,
+    storage: isPg ? 'postgres' : 'local-json-fallback',
+    databaseConnected: isPg,
+    saltSource: sightings.getSaltSource(),
+    hasPermanentSalt: sightings.getSaltSource() === 'env',
+    accommodations: db.all().length,
+    graphEntities: g.totalEntities,
+    graphEdges: g.totalEdges,
+    totalDisputes: g.totalReports,
+    totalQueries: s.queries,
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -384,5 +400,10 @@ app.listen(PORT, async () => {
   console.log(`🏝️  kohlarn-verify-bot รันอยู่ที่ http://localhost:${PORT}`);
   await initPostgres();
   await db.syncFromPostgres();
+  const isPg = require('./postgres').isPostgres();
+  const saltSource = sightings.getSaltSource();
+
+  console.log(`    ฐานข้อมูล: ${isPg ? '✅ PostgreSQL (ถาวร)' : '⚠️ Local JSON (ข้อมูลจะหายเมื่อรีสตาร์ท)'}`);
+  console.log(`    Salt ความจำ: ${saltSource === 'env' ? '✅ SIGHTING_SALT จาก .env' : '⚠️ สุ่มใหม่ในเครื่อง (ควรตั้ง SIGHTING_SALT บน Railway)'}`);
   console.log(`    ที่พักในฐานข้อมูล: ${db.all().length} รายการ (ยืนยันแล้ว ${db.verified().length})`);
 });
