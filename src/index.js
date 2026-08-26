@@ -148,7 +148,7 @@ app.get('/health', async (req, res) => {
 // SEO: บอก Google ว่ามีหน้าอะไรบ้าง และระบบ Auto-Ping
 // ---------------------------------------------------------------------------
 function getPublicPages() {
-  const list = ['/'];
+  const list = ['/', '/en/', '/ru/', '/zh/', '/flyer.html'];
   try {
     const fs = require('fs');
     const files = fs.readdirSync(path.join(__dirname, '..', 'public'));
