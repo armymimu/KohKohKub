@@ -91,7 +91,7 @@ async function buildReply(userText, options = { recordGraph: true }) {
     );
 
     if (accounts.length && options.recordGraph) {
-      const stat = sightings.record(accounts[0].digits);
+      const stat = await sightings.record(accounts[0].digits);
       replies.push(toTextMessage(msg.sightingText(stat)));
     }
 
@@ -102,7 +102,7 @@ async function buildReply(userText, options = { recordGraph: true }) {
   // 5. กรณีมีเลขบัญชี หรือ พร้อมเพย์
   if (accounts.length || promptpays.length) {
     const targetAccount = accounts[0]?.digits || promptpays[0]?.digits;
-    const stat = options.recordGraph ? sightings.record(targetAccount) : null;
+    const stat = options.recordGraph ? await sightings.record(targetAccount) : null;
     const result = search(db.all(), targetAccount);
 
     if (result.match && result.match.verified) {

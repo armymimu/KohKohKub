@@ -126,7 +126,7 @@ app.get('/consent', (req, res) => {
 
 app.get('/health', async (req, res) => {
   const g = await graph.getGraphStats();
-  const s = sightings.stats();
+  const s = await sightings.stats();
   const isPg = require('./postgres').isPostgres();
   res.json({
     ok: true,
@@ -226,7 +226,7 @@ async function submitIndexNow() {
 
 app.get('/site-config', async (req, res) => {
   const id = appConfig.lineOaId;
-  const s = sightings.stats();
+  const s = await sightings.stats();
   const g = await graph.getGraphStats();
   res.json({
     lineOaId: id || null,

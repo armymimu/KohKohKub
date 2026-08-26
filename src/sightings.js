@@ -1,6 +1,6 @@
 ﻿/**
  * ความจำร่วมของผู้ใช้ (Crowd Memory)
- * รองรับทั้ง PostgreSQL (ถาวรบน Railway) และ Local JSON
+ * PostgreSQL-First Architecture (ถาวรบน Railway พร้อม fallback สู่ Local JSON)
  */
 
 const fs = require('fs');
@@ -51,11 +51,47 @@ function loadLocal() {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function record(accountDigits) {
-  const db = loadLocal();
+/**
+ * บันทึกการพบเลขบัญชี — อ่านและเขียนจาก PostgreSQL เป็นหลัก
+ */
+async function record(accountDigits) {
   const key = hashAccount(accountDigits);
   const now = new Date().toISOString();
 
+  // 1. ถ้าเชื่อมต่อ PostgreSQL ให้ใช้ Postgres เป็น Single Source of Truth
+  if (isPostgres()) {
+    try {
+      const res = await pool.query(
+        `INSERT INTO sightings (account_hash, first_seen, last_seen, count)
+         VALUES ($1, $2, $2, 1)
+         ON CONFLICT (account_hash) DO UPDATE
+         SET count = sightings.count + 1, last_seen = $2
+         RETURNING account_hash, first_seen, last_seen, count`,
+        [key, now]
+      );
+
+      const row = res.rows[0];
+      const count = Number(row.count);
+      const firstSeen = new Date(row.first_seen).toISOString();
+      const lastSeen = new Date(row.last_seen).toISOString();
+      const spanDays = (new Date(lastSeen) - new Date(firstSeen)) / DAY_MS;
+
+      return {
+        count,
+        firstSeen,
+        lastSeen,
+        spanDays,
+        isFirstEver: count === 1,
+        burst: count >= 5 && spanDays < 14,
+        longLived: spanDays >= 120 && count >= 3,
+      };
+    } catch (err) {
+      console.error('[sightings] Postgres record error, falling back to local:', err);
+    }
+  }
+
+  // 2. Fallback สู่ Local JSON
+  const db = loadLocal();
   const existing = db.records[key];
   const isFirstEver = !existing;
 
@@ -64,7 +100,6 @@ function record(accountDigits) {
   entry.last = now;
   db.records[key] = entry;
 
-  // Local backup
   writeQueue = writeQueue.then(async () => {
     try {
       const tmp = `${FILE}.tmp`;
@@ -72,17 +107,6 @@ function record(accountDigits) {
       await fs.promises.rename(tmp, FILE);
     } catch (e) {}
   });
-
-  // Async Postgres write
-  if (isPostgres()) {
-    pool.query(
-      `INSERT INTO sightings (account_hash, first_seen, last_seen, count)
-       VALUES ($1, $2, $2, 1)
-       ON CONFLICT (account_hash) DO UPDATE
-       SET count = sightings.count + 1, last_seen = $2`,
-      [key, now]
-    ).catch((e) => console.error('[sightings] Postgres error:', e));
-  }
 
   const spanDays = (new Date(entry.last) - new Date(entry.first)) / DAY_MS;
 
@@ -97,7 +121,24 @@ function record(accountDigits) {
   };
 }
 
-function stats() {
+/**
+ * ดึงสถิติจำนวนบัญชีและจำนวนครั้งที่ตรวจทั้งหมด — จาก Postgres
+ */
+async function stats() {
+  if (isPostgres()) {
+    try {
+      const res = await pool.query(
+        `SELECT COUNT(*)::int AS accounts, COALESCE(SUM(count), 0)::int AS queries FROM sightings`
+      );
+      return {
+        accounts: Number(res.rows[0]?.accounts || 0),
+        queries: Number(res.rows[0]?.queries || 0),
+      };
+    } catch (err) {
+      console.error('[sightings] Postgres stats error:', err);
+    }
+  }
+
   const records = Object.values(loadLocal().records);
   return {
     accounts: records.length,
