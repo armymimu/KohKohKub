@@ -11,7 +11,7 @@ const msg = require('./messages');
 const flex = require('./flexMessages');
 const { extractAllEntities } = require('./extractor');
 const graph = require('./graph');
-const { findOfficialRecord } = require('./officialData');
+const { getOfficialVerificationLinks } = require('./officialData');
 
 const LINE_TEXT_LIMIT = 4900;
 
@@ -121,28 +121,17 @@ async function buildReply(userText, options = { recordGraph: true }) {
     return replies.slice(0, 5);
   }
 
-  // 6. ตรวจรายชื่อทางการจาก ก.ล.ต. / ธปท. (Official SEC & BOT Alert/Whitelist)
-  const official = findOfficialRecord(text);
+  // 6. ลิงก์ตรวจสอบทางการกับ ก.ล.ต. / ธปท. (Official Regulatory Direct Links)
+  const official = getOfficialVerificationLinks(text);
   if (official) {
-    if (official.type === 'alert') {
-      replies.push(
-        flex.buildWarningFlex(
-          official.badge,
-          `พบข้อมูลในประกาศเตือนภัย: ${official.name}`,
-          `${official.note}\n\n📌 อ้างอิงประกาศทางการ: ${official.source}`,
-          accounts[0]?.digits || ''
-        )
-      );
-      replies.push(toTextMessage(`🔗 ตรวจสอบรายชื่อเตือนภัยฉบับเต็มได้ที่:\n${official.officialUrl}`));
-      return replies.slice(0, 5);
-    } else if (official.type === 'licensed') {
-      replies.push(
-        toTextMessage(
-          `${official.badge}\n\n🏢 ${official.name}\n${official.note}\n\n📌 ตรวจสอบรายชื่อผู้ได้รับใบอนุญาตทางการ:\n${official.officialUrl}`
-        )
-      );
-      return replies.slice(0, 5);
-    }
+    const linkLines = official.links.map((l) => `• ${l.label}:\n${l.url}`).join('\n\n');
+    replies.push(
+      toTextMessage(
+        `${official.title}\n\n${official.description}\n\n${linkLines}\n\n📞 ${official.hotline}`
+      )
+    );
+    replies.push(toTextMessage(msg.riskWarningText()));
+    return replies.slice(0, 5);
   }
 
   // 7. กรณีค้นด้วยชื่อ หรือ เบอร์โทร
