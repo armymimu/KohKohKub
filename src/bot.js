@@ -1,4 +1,4 @@
-﻿/**
+/**
  * สมองของบอท: ประมวลผลบทสนทนา (Conversation Extractor + Identity Graph)
  * ใช้ถ้อยคำที่เป็นกลาง ไม่ยืนยันข้อเท็จจริงแทนศาลหรือตำรวจ เพื่อความปลอดภัยทางกฎหมาย
  */
@@ -11,6 +11,7 @@ const msg = require('./messages');
 const flex = require('./flexMessages');
 const { extractAllEntities } = require('./extractor');
 const graph = require('./graph');
+const { findOfficialRecord } = require('./officialData');
 
 const LINE_TEXT_LIMIT = 4900;
 
@@ -120,7 +121,31 @@ async function buildReply(userText, options = { recordGraph: true }) {
     return replies.slice(0, 5);
   }
 
-  // 6. กรณีค้นด้วยชื่อ หรือ เบอร์โทร
+  // 6. ตรวจรายชื่อทางการจาก ก.ล.ต. / ธปท. (Official SEC & BOT Alert/Whitelist)
+  const official = findOfficialRecord(text);
+  if (official) {
+    if (official.type === 'alert') {
+      replies.push(
+        flex.buildWarningFlex(
+          official.badge,
+          `พบข้อมูลในประกาศเตือนภัย: ${official.name}`,
+          `${official.note}\n\n📌 อ้างอิงประกาศทางการ: ${official.source}`,
+          accounts[0]?.digits || ''
+        )
+      );
+      replies.push(toTextMessage(`🔗 ตรวจสอบรายชื่อเตือนภัยฉบับเต็มได้ที่:\n${official.officialUrl}`));
+      return replies.slice(0, 5);
+    } else if (official.type === 'licensed') {
+      replies.push(
+        toTextMessage(
+          `${official.badge}\n\n🏢 ${official.name}\n${official.note}\n\n📌 ตรวจสอบรายชื่อผู้ได้รับใบอนุญาตทางการ:\n${official.officialUrl}`
+        )
+      );
+      return replies.slice(0, 5);
+    }
+  }
+
+  // 7. กรณีค้นด้วยชื่อ หรือ เบอร์โทร
   const result = search(db.all(), text);
   if (result.match && result.match.verified) {
     replies.push(flex.buildVerifiedFlex(result.match));

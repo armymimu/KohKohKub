@@ -1,0 +1,24 @@
+﻿# Safeโอน (SafeOne)
+> โอนปลอดภัย ทุกยอดเงิน | Real-time Thai Bank Account & Online Fraud Verification Service
+
+## Overview
+Safeโอน (SafeOne) is a privacy-first Thai financial safety platform that allows consumers, e-commerce shoppers, and travelers to verify bank accounts, phone numbers, and seller identities before transferring money.
+
+## Key Capabilities
+- **Multi-Entity Identity Graph:** Links bank accounts, phone numbers, LINE IDs, and platform links to detect mule account networks.
+- **Privacy-Preserving (PDPA Compliant):** Queries are hashed via one-way HMAC-SHA256. Bank accounts are not stored in plaintext.
+- **Official Regulatory Whitelisting:** Cross-references SEC Thailand (ก.ล.ต. Investor Alert & Licensed Entities) and Bank of Thailand (ธปท. Licensed Lenders).
+- **Emergency Fraud Response:** Provides instant hotline routing to 15 Thai bank fraud command centers and the AOC 1441 Anti-Online Scam Operation Center.
+
+## APIs (Read-Only)
+- `GET https://kohkohkub-production.up.railway.app/api/check?q={query}`
+  - Returns verification status, dispute count, and network connectivity indicators.
+
+## Key Emergency Contacts (Thailand)
+- AOC 1441 (สายด่วนศูนย์ปราบปรามอาชญากรรมทางเทคโนโลยี 24 ชม.)
+- Thai Police Online: https://thaipoliceonline.go.th
+- KBank Fraud Hotline: 02-888-8888 กด 01
+- SCB Fraud Hotline: 02-777-7575
+- BBL Fraud Hotline: 1333 กด *3
+- KTB Fraud Hotline: 02-111-1111 กด 108
+- TrueMoney Fraud Hotline: 1240 กด 6

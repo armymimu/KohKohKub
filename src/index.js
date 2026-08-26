@@ -147,24 +147,19 @@ app.get('/health', async (req, res) => {
 // ---------------------------------------------------------------------------
 // SEO: บอก Google ว่ามีหน้าอะไรบ้าง และระบบ Auto-Ping
 // ---------------------------------------------------------------------------
-const PUBLIC_PAGES = [
-  '/',
-  '/check-account.html',
-  '/hotel-scam.html',
-  '/car-rental-scam.html',
-  '/ticket-scam.html',
-  '/investment-scam.html',
-  '/loan-scam.html',
-  '/shopping-scam.html',
-  '/freeze-account.html',
-  '/job-scam.html',
-  '/scammed.html',
-  '/koh-larn.html',
-  '/stats.html',
-  '/register.html',
-];
-
-
+function getPublicPages() {
+  const list = ['/'];
+  try {
+    const fs = require('fs');
+    const files = fs.readdirSync(path.join(__dirname, '..', 'public'));
+    for (const f of files) {
+      if (f.endsWith('.html') && !f.startsWith('google') && f !== 'admin.html') {
+        list.push(`/${f}`);
+      }
+    }
+  } catch (e) {}
+  return [...new Set(list)];
+}
 
 app.get('/stats', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'stats.html'));
@@ -180,8 +175,9 @@ app.get('/robots.txt', (req, res) => {
 app.get('/sitemap.xml', (req, res) => {
   const base = appConfig.baseUrl || `${req.protocol}://${req.get('host')}`;
   const today = new Date().toISOString().slice(0, 10);
-  const urls = PUBLIC_PAGES.map(
-    (p) => `  <url><loc>${base}${p}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`
+  const pages = getPublicPages();
+  const urls = pages.map(
+    (p) => `  <url><loc>${base}${p}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`
   ).join('\n');
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`
@@ -200,7 +196,7 @@ async function submitIndexNow() {
   const base = appConfig.baseUrl || 'https://kohkohkub-production.up.railway.app';
   if (base.includes('localhost')) return;
 
-  const urlList = PUBLIC_PAGES.map((p) => `${base}${p}`);
+  const urlList = getPublicPages().map((p) => `${base}${p}`);
   const payload = {
     host: base.replace(/^https?:\/\//, ''),
     key: INDEXNOW_KEY,
