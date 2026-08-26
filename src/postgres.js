@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PostgreSQL Database Adapter for Railway & Production
  * Auto-detects DATABASE_URL, initializes tables, and seeds initial data.
  */
@@ -103,39 +103,49 @@ async function initPostgres() {
       ALTER TABLE scam_reports ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT false;
     `).catch(() => {});
 
-    // Seed accommodations if table is empty
-    const checkSeed = await client.query('SELECT COUNT(*) FROM accommodations');
-    if (parseInt(checkSeed.rows[0].count, 10) === 0) {
-      const seedPath = path.join(__dirname, 'data', 'accommodations.seed.json');
-      if (fs.existsSync(seedPath)) {
-        const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
-        const list = seedData.accommodations || [];
-        for (const item of list) {
-          await client.query(
-            `INSERT INTO accommodations 
-              (id, name, aliases, bank_name, account_number, account_name, facebook_page, phone, gps, area, category, verified, verified_at, verified_by, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
-             ON CONFLICT (id) DO NOTHING`,
-            [
-              item.id,
-              item.name,
-              JSON.stringify(item.aliases || []),
-              item.bankName || '',
-              item.accountNumber || '',
-              item.accountName || '',
-              item.facebookPage || '',
-              item.phone || '',
-              item.gps ? JSON.stringify(item.gps) : null,
-              item.area || '',
-              item.category || '',
-              item.verified === true,
-              item.verifiedAt || null,
-              item.verifiedBy || 'ระบบเริ่มต้น',
-            ]
-          );
-        }
-        console.log(`[pg] Seed ข้อมูลเริ่มต้น ${list.length} รายการลง Postgres เรียบร้อย`);
+    // Seed / Sync verified accommodations to Postgres
+    const seedPath = path.join(__dirname, 'data', 'accommodations.seed.json');
+    if (fs.existsSync(seedPath)) {
+      const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+      const list = seedData.accommodations || [];
+      for (const item of list) {
+        await client.query(
+          `INSERT INTO accommodations 
+            (id, name, aliases, bank_name, account_number, account_name, facebook_page, phone, gps, area, category, verified, verified_at, verified_by, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+           ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            aliases = EXCLUDED.aliases,
+            bank_name = EXCLUDED.bank_name,
+            account_number = EXCLUDED.account_number,
+            account_name = EXCLUDED.account_name,
+            facebook_page = EXCLUDED.facebook_page,
+            phone = EXCLUDED.phone,
+            gps = EXCLUDED.gps,
+            area = EXCLUDED.area,
+            category = EXCLUDED.category,
+            verified = EXCLUDED.verified,
+            verified_at = EXCLUDED.verified_at,
+            verified_by = EXCLUDED.verified_by`,
+          [
+            item.id,
+            item.name,
+            JSON.stringify(item.aliases || []),
+            item.bankName || '',
+            item.accountNumber || '',
+            item.accountName || '',
+            item.facebookPage || '',
+            item.phone || '',
+            item.gps ? JSON.stringify(item.gps) : null,
+            item.area || '',
+            item.category || '',
+            item.verified === true,
+            item.verifiedAt || null,
+            item.verifiedBy || 'สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน',
+          ]
+        );
       }
+      console.log(`[pg] อัปเดตรายชื่อธุรกิจยืนยัน ${list.length} รายการลง Postgres เรียบร้อย`);
     }
 
     console.log('[pg] PostgreSQL พร้อมใช้งาน 100%');

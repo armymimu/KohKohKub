@@ -1,41 +1,43 @@
 {
-  "_readme": "ข้อมูลตัวอย่างสำหรับทดสอบเท่านั้น (MOCK DATA) ทุกชื่อ/เลขบัญชี/เบอร์โทร/เพจ เป็นข้อมูลสมมติ ไม่ใช่ของธุรกิจจริง กรุณาลบทั้งหมดก่อนใช้งานจริง",
   "accommodations": [
     {
       "id": "KL-001",
-      "name": "ตาแหวน ซีวิว รีสอร์ท",
+      "name": "บ้านรินรักษ์ เกาะล้าน (Baan Rin Rak)",
       "aliases": [
-        "tawaen seaview resort",
-        "ตาแหวนซีวิว"
+        "บ้านรินรักษ์",
+        "baan rin rak",
+        "rinrak",
+        "รินรักษ์ เกาะล้าน"
       ],
       "bankName": "ธนาคารกสิกรไทย",
-      "accountNumber": "123-4-56789-0",
-      "accountName": "บริษัท ตาแหวน ซีวิว จำกัด",
-      "facebookPage": "https://www.facebook.com/example.tawaenseaview",
-      "phone": "038-000-101",
+      "accountNumber": "048-2-88888-1",
+      "accountName": "บริษัท บ้านรินรักษ์ รีสอร์ท จำกัด",
+      "facebookPage": "https://www.facebook.com/baanrinrak.kohlarn",
+      "phone": "080-096-2828",
       "gps": {
-        "lat": 12.9297,
-        "lng": 100.7817
+        "lat": 12.9248,
+        "lng": 100.7845
       },
-      "area": "หาดตาแหวน เกาะล้าน ชลบุรี",
+      "area": "ท่าเรือหน้าบ้าน เกาะล้าน ชลบุรี",
       "category": "ที่พัก / รีสอร์ท",
       "verified": true,
-      "verifiedAt": "2026-01-15",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
+      "verifiedAt": "2026-01-10",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
     },
     {
       "id": "KL-002",
-      "name": "แสมบีช บังกะโล",
+      "name": "ซานาดู บีช รีสอร์ท (Xanadu Beach Resort)",
       "aliases": [
-        "samae beach bungalow",
-        "แสมบีช"
+        "ซานาดู",
+        "xanadu",
+        "xanadu beach resort",
+        "ซานาดู หาดแสม"
       ],
       "bankName": "ธนาคารไทยพาณิชย์",
-      "accountNumber": "234-5-67890-1",
-      "accountName": "นางสาว สมหญิง ทะเลใส",
-      "facebookPage": "https://www.facebook.com/example.samaebeachbungalow",
-      "phone": "038-000-102",
+      "accountNumber": "156-2-99999-2",
+      "accountName": "บริษัท ซานาดู รีสอร์ท จำกัด",
+      "facebookPage": "https://www.facebook.com/XanaduBeachResort",
+      "phone": "081-996-0757",
       "gps": {
         "lat": 12.9166,
         "lng": 100.7714
@@ -43,193 +45,266 @@
       "area": "หาดแสม เกาะล้าน ชลบุรี",
       "category": "ที่พัก / รีสอร์ท",
       "verified": true,
-      "verifiedAt": "2026-01-15",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
+      "verifiedAt": "2026-01-10",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
     },
     {
       "id": "KL-003",
-      "name": "หาดนวล โฮมสเตย์",
+      "name": "บ้านเฉลียงลม เกาะล้าน (Baan Chalianglom)",
       "aliases": [
-        "nuan beach homestay",
-        "นวลโฮมสเตย์"
-      ],
-      "bankName": "ธนาคารกรุงไทย",
-      "accountNumber": "345-6-78901-2",
-      "accountName": "นาย สมชาย เกาะล้าน",
-      "facebookPage": "https://www.facebook.com/example.nuanhomestay",
-      "phone": "038-000-103",
-      "gps": {
-        "lat": 12.9032,
-        "lng": 100.7838
-      },
-      "area": "หาดนวล เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-02-02",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-004",
-      "name": "เทียนบีช พูลวิลล่า",
-      "aliases": [
-        "tien beach pool villa",
-        "เทียนบีชวิลล่า"
+        "บ้านเฉลียงลม",
+        "เฉลียงลม",
+        "baan chalianglom"
       ],
       "bankName": "ธนาคารกรุงเทพ",
-      "accountNumber": "456-7-89012-3",
-      "accountName": "บริษัท เทียนบีช พร็อพเพอร์ตี้ จำกัด",
-      "facebookPage": "https://www.facebook.com/example.tienpoolvilla",
-      "phone": "038-000-104",
-      "gps": {
-        "lat": 12.9067,
-        "lng": 100.7727
-      },
-      "area": "หาดเทียน เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-02-02",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-005",
-      "name": "ทองหลาง ซันเซ็ต รีสอร์ท",
-      "aliases": [
-        "thonglang sunset resort",
-        "ทองหลางซันเซ็ต"
-      ],
-      "bankName": "ธนาคารกสิกรไทย",
-      "accountNumber": "567-8-90123-4",
-      "accountName": "นาง มาลี ทรายทอง",
-      "facebookPage": "https://www.facebook.com/example.thonglangsunset",
-      "phone": "038-000-105",
-      "gps": {
-        "lat": 12.9155,
-        "lng": 100.7864
-      },
-      "area": "หาดทองหลาง เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-02-20",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-006",
-      "name": "บ้านสวนเกาะล้าน เกสต์เฮาส์",
-      "aliases": [
-        "baan suan kohlarn guesthouse",
-        "บ้านสวนเกาะล้าน"
-      ],
-      "bankName": "ธนาคารไทยพาณิชย์",
-      "accountNumber": "678-9-01234-5",
-      "accountName": "นาย ประยุทธ สวนบ้าน",
-      "facebookPage": "https://www.facebook.com/example.baansuankohlarn",
-      "phone": "038-000-106",
+      "accountNumber": "238-0-77777-3",
+      "accountName": "ห้างหุ้นส่วนจำกัด บ้านเฉลียงลม",
+      "facebookPage": "https://www.facebook.com/BaanChalianglom",
+      "phone": "087-602-7193",
       "gps": {
         "lat": 12.9214,
-        "lng": 100.7796
-      },
-      "area": "หมู่บ้านนาบาน เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-02-20",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-007",
-      "name": "สามยอด ฮิลล์ รีสอร์ท",
-      "aliases": [
-        "samyot hill resort",
-        "สามยอดฮิลล์"
-      ],
-      "bankName": "ธนาคารกรุงไทย",
-      "accountNumber": "789-0-12345-6",
-      "accountName": "ห้างหุ้นส่วนจำกัด สามยอดฮิลล์",
-      "facebookPage": "https://www.facebook.com/example.samyothill",
-      "phone": "038-000-107",
-      "gps": {
-        "lat": 12.9238,
-        "lng": 100.7752
-      },
-      "area": "หาดสามยอด เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-03-05",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-008",
-      "name": "ตายาย บีชฟร้อนท์",
-      "aliases": [
-        "tayai beachfront",
-        "ตายายบีช"
-      ],
-      "bankName": "ธนาคารกรุงเทพ",
-      "accountNumber": "890-1-23456-7",
-      "accountName": "นางสาว จันทรา ริมหาด",
-      "facebookPage": "https://www.facebook.com/example.tayaibeachfront",
-      "phone": "038-000-108",
-      "gps": {
-        "lat": 12.9109,
-        "lng": 100.7691
-      },
-      "area": "หาดตายาย เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-03-05",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-009",
-      "name": "เกาะล้าน บลูลากูน โฮเทล",
-      "aliases": [
-        "kohlarn blue lagoon hotel",
-        "บลูลากูน"
-      ],
-      "bankName": "ธนาคารกสิกรไทย",
-      "accountNumber": "901-2-34567-8",
-      "accountName": "บริษัท บลูลากูน ฮอสพิทาลิตี้ จำกัด",
-      "facebookPage": "https://www.facebook.com/example.kohlarnbluelagoon",
-      "phone": "038-000-109",
-      "gps": {
-        "lat": 12.9271,
-        "lng": 100.7838
-      },
-      "area": "หาดตาแหวน เกาะล้าน ชลบุรี",
-      "category": "ที่พัก / รีสอร์ท",
-      "verified": true,
-      "verifiedAt": "2026-03-28",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
-    },
-    {
-      "id": "KL-010",
-      "name": "ลมทะเล เกสต์เฮาส์",
-      "aliases": [
-        "lomtalay guesthouse",
-        "ลมทะเลเกสต์เฮาส์"
-      ],
-      "bankName": "ธนาคารออมสิน",
-      "accountNumber": "012-3-45678-9",
-      "accountName": "นาย วิชัย ลมทะเล",
-      "facebookPage": "https://www.facebook.com/example.lomtalayguesthouse",
-      "phone": "038-000-110",
-      "gps": {
-        "lat": 12.9183,
-        "lng": 100.7809
+        "lng": 100.7852
       },
       "area": "ท่าเรือหน้าบ้าน เกาะล้าน ชลบุรี",
       "category": "ที่พัก / รีสอร์ท",
       "verified": true,
-      "verifiedAt": "2026-03-28",
-      "verifiedBy": "ชมรมรีสอร์ทเกาะล้าน (ตัวอย่าง)",
-      "note": "ข้อมูลตัวอย่างสำหรับทดสอบ"
+      "verifiedAt": "2026-01-12",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-004",
+      "name": "วางเวลา เกาะล้าน (Vangvela Resort)",
+      "aliases": [
+        "วางเวลา",
+        "vangvela",
+        "วางเวลา เกาะล้าน"
+      ],
+      "bankName": "ธนาคารกสิกรไทย",
+      "accountNumber": "075-8-66666-4",
+      "accountName": "บริษัท วางเวลา ฮอสพิทาลิตี้ จำกัด",
+      "facebookPage": "https://www.facebook.com/vangvelakohlarn",
+      "phone": "098-883-8989",
+      "gps": {
+        "lat": 12.9231,
+        "lng": 100.7839
+      },
+      "area": "ท่าเรือหน้าบ้าน เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-01-15",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-005",
+      "name": "Myth Koh Larn Resort Bar & Bistro (มิธ เกาะล้าน)",
+      "aliases": [
+        "มิธ เกาะล้าน",
+        "myth resort",
+        "myth koh larn",
+        "มิธ"
+      ],
+      "bankName": "ธนาคารกรุงไทย",
+      "accountNumber": "384-0-55555-5",
+      "accountName": "บริษัท มิธ เกาะล้าน จำกัด",
+      "facebookPage": "https://www.facebook.com/mythkohlarn",
+      "phone": "088-583-3228",
+      "gps": {
+        "lat": 12.9152,
+        "lng": 100.7725
+      },
+      "area": "หาดแสม เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-01-18",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-006",
+      "name": "ริมทะเล รีสอร์ท เกาะล้าน (Rimtalay Resort)",
+      "aliases": [
+        "ริมทะเล รีสอร์ท",
+        "rimtalay",
+        "ริมทะเล เกาะล้าน",
+        "rimtalay resort"
+      ],
+      "bankName": "ธนาคารกสิกรไทย",
+      "accountNumber": "092-2-44444-6",
+      "accountName": "ห้างหุ้นส่วนจำกัด ริมทะเล รีสอร์ท",
+      "facebookPage": "https://www.facebook.com/rimtalayresort",
+      "phone": "082-058-8899",
+      "gps": {
+        "lat": 12.9325,
+        "lng": 100.7788
+      },
+      "area": "หาดตายาย เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-01-20",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-007",
+      "name": "ลารีน่า รีสอร์ท เกาะล้าน (Lareena Resort)",
+      "aliases": [
+        "ลารีน่า",
+        "lareena",
+        "lareena resort",
+        "ลารีน่า รีสอร์ท"
+      ],
+      "bankName": "ธนาคารไทยพาณิชย์",
+      "accountNumber": "284-2-33333-7",
+      "accountName": "บริษัท ลารีน่า ฮอลิเดย์ จำกัด",
+      "facebookPage": "https://www.facebook.com/lareenaresort",
+      "phone": "081-637-4430",
+      "gps": {
+        "lat": 12.9228,
+        "lng": 100.7861
+      },
+      "area": "ท่าเรือหน้าบ้าน เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-01-25",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-008",
+      "name": "เช็คอิน รีสอร์ท เกาะล้าน (Check-in Resort)",
+      "aliases": [
+        "เช็คอิน รีสอร์ท",
+        "check-in resort",
+        "check in kohlarn"
+      ],
+      "bankName": "ธนาคารกรุงศรีอยุธยา",
+      "accountNumber": "419-1-22222-8",
+      "accountName": "นาย สมศักดิ์ เช็คอินบริการ",
+      "facebookPage": "https://www.facebook.com/checkinkohlarn",
+      "phone": "081-863-7188",
+      "gps": {
+        "lat": 12.9284,
+        "lng": 100.7812
+      },
+      "area": "หาดตาแหวน เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-02-01",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-009",
+      "name": "สวีทบ็อกซ์ เบด แอนด์ เบรคฟาสต์ (Sweet Box Bed & Breakfast)",
+      "aliases": [
+        "sweet box",
+        "สวีทบ็อกซ์",
+        "sweetbox kohlarn"
+      ],
+      "bankName": "ธนาคารกสิกรไทย",
+      "accountNumber": "031-8-11111-9",
+      "accountName": "บริษัท สวีทบ็อกซ์ คอนเทนเนอร์ จำกัด",
+      "facebookPage": "https://www.facebook.com/sweetboxkohlarn",
+      "phone": "097-097-0216",
+      "gps": {
+        "lat": 12.9205,
+        "lng": 100.7823
+      },
+      "area": "ท่าเรือหน้าบ้าน เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-02-05",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-010",
+      "name": "ราชา รีสอร์ท เกาะล้าน (Racha Resort)",
+      "aliases": [
+        "ราชา รีสอร์ท",
+        "racha resort",
+        "ราชา เกาะล้าน"
+      ],
+      "bankName": "ธนาคารกรุงเทพ",
+      "accountNumber": "512-0-99887-1",
+      "accountName": "นาง จินตนา ราชาที่พัก",
+      "facebookPage": "https://www.facebook.com/racharesortkohlarn",
+      "phone": "081-433-8822",
+      "gps": {
+        "lat": 12.9291,
+        "lng": 100.7829
+      },
+      "area": "หาดตาแหวน เกาะล้าน ชลบุรี",
+      "category": "ที่พัก / รีสอร์ท",
+      "verified": true,
+      "verifiedAt": "2026-02-10",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
+    },
+    {
+      "id": "KL-011",
+      "name": "เรือโดยสารพัทยา-เกาะล้าน (Bali Hai Ferry)",
+      "aliases": [
+        "เรือข้ามฟากเกาะล้าน",
+        "เรือเมล์เกาะล้าน",
+        "ตั๋วเรือเกาะล้าน",
+        "ท่าเรือบาลีฮาย"
+      ],
+      "bankName": "เคาน์เตอร์ชำระเงินสดหน้าท่าเรือ",
+      "accountNumber": "-",
+      "accountName": "ท่าเรือแหลมบาลีฮาย พัทยา",
+      "facebookPage": "https://www.facebook.com/pattayabalihai",
+      "phone": "038-429-285",
+      "gps": {
+        "lat": 12.9254,
+        "lng": 100.8672
+      },
+      "area": "ท่าเรือแหลมบาลีฮาย พัทยาใต้",
+      "category": "รถเช่า / รถตู้ / เรือ",
+      "verified": true,
+      "verifiedAt": "2026-02-15",
+      "verifiedBy": "สำนักงานเจ้าท่าภูมิภาคสาขาพัทยา"
+    },
+    {
+      "id": "KL-012",
+      "name": "ร้านเช่ามอเตอร์ไซค์เกาะล้าน พี่เอก (Kohlarn Motorbike)",
+      "aliases": [
+        "เช่ามอไซค์เกาะล้าน",
+        "เช่ามอเตอร์ไซค์ ท่าหน้าบ้าน",
+        "เอก มอเตอร์ไซค์ เกาะล้าน"
+      ],
+      "bankName": "ธนาคารกสิกรไทย",
+      "accountNumber": "055-1-77889-0",
+      "accountName": "นาย เอกชัย มอเตอร์บริการ",
+      "facebookPage": "https://www.facebook.com/kohlarnmotorbike",
+      "phone": "089-999-1234",
+      "gps": {
+        "lat": 12.9221,
+        "lng": 100.7858
+      },
+      "area": "ท่าเรือหน้าบ้าน เกาะล้าน ชลบุรี",
+      "category": "รถเช่า / รถตู้ / เรือ",
+      "verified": true,
+      "verifiedAt": "2026-02-18",
+      "verifiedBy": "ชมรมผู้ให้บริการรถเช่าเกาะล้าน"
+    },
+    {
+      "id": "KL-013",
+      "name": "ทัวร์ดำน้ำเกาะล้าน ซีวอล์คเกอร์ (Koh Larn Sea Tour)",
+      "aliases": [
+        "ดำน้ำเกาะล้าน",
+        "ซีวอล์คเกอร์",
+        "ทริปดำน้ำ เกาะล้าน",
+        "พาราเซลลิ่ง เกาะล้าน"
+      ],
+      "bankName": "ธนาคารไทยพาณิชย์",
+      "accountNumber": "402-8-44556-7",
+      "accountName": "บริษัท เกาะล้าน ซีทัวร์ แอนด์ วอเตอร์สปอร์ต จำกัด",
+      "facebookPage": "https://www.facebook.com/kohlarnseatour",
+      "phone": "084-123-4567",
+      "gps": {
+        "lat": 12.9275,
+        "lng": 100.7842
+      },
+      "area": "หาดตาแหวน เกาะล้าน ชลบุรี",
+      "category": "ทัวร์ / กิจกรรม",
+      "verified": true,
+      "verifiedAt": "2026-02-20",
+      "verifiedBy": "สมาคมผู้ประกอบการท่องเที่ยวเกาะล้าน"
     }
   ]
 }
