@@ -187,6 +187,44 @@ app.get('/sitemap.xml', (req, res) => {
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`
   );
 });
+// ---------------------------------------------------------------------------
+// IndexNow Protocol (Instant SEO Indexing for Bing, Yandex, Naver, Seznam)
+// ---------------------------------------------------------------------------
+const INDEXNOW_KEY = 'c7e3f890a12b45de89f1a234567890bc';
+
+app.get(`/${INDEXNOW_KEY}.txt`, (req, res) => {
+  res.type('text/plain').send(INDEXNOW_KEY);
+});
+
+async function submitIndexNow() {
+  const base = appConfig.baseUrl || 'https://kohkohkub-production.up.railway.app';
+  if (base.includes('localhost')) return;
+
+  const urlList = PUBLIC_PAGES.map((p) => `${base}${p}`);
+  const payload = {
+    host: base.replace(/^https?:\/\//, ''),
+    key: INDEXNOW_KEY,
+    keyLocation: `${base}/${INDEXNOW_KEY}.txt`,
+    urlList,
+  };
+
+  try {
+    const https = require('https');
+    const data = JSON.stringify(payload);
+    const req = https.request('https://api.indexnow.org/indexnow', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    }, (res) => {
+      console.log(`[IndexNow] ส่ง ${urlList.length} หน้าเข้า Search Engine: status ${res.statusCode}`);
+    });
+    req.on('error', () => {});
+    req.write(data);
+    req.end();
+  } catch (e) {}
+}
 
 
 
@@ -410,4 +448,5 @@ app.listen(PORT, async () => {
   console.log(`    ฐานข้อมูล: ${isPg ? '✅ PostgreSQL (ถาวร)' : '⚠️ Local JSON (ข้อมูลจะหายเมื่อรีสตาร์ท)'}`);
   console.log(`    Salt ความจำ: ${saltSource === 'env' ? '✅ SIGHTING_SALT จาก .env' : '⚠️ สุ่มใหม่ในเครื่อง (ควรตั้ง SIGHTING_SALT บน Railway)'}`);
   console.log(`    ที่พักในฐานข้อมูล: ${db.all().length} รายการ (ยืนยันแล้ว ${db.verified().length})`);
+  submitIndexNow();
 });
