@@ -58,10 +58,10 @@
 
       if (data.verified) {
         res.innerHTML = `<div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:10px;border-radius:8px;color:#166534;">✅ <b>${data.match.name}</b> ได้รับการยืนยันแล้ว<br>บัญชี: ${data.match.accountNumber} (${data.match.bankName})</div>`;
-      } else if (data.riskAlert) {
-        res.innerHTML = `<div style="background:#fef2f2;border:1px solid #fecaca;padding:10px;border-radius:8px;color:#991b1b;">🚨 <b>พบสัญญาณความเสี่ยง:</b> ${data.riskReason}<br><a href="${apiHost}/scammed.html" target="_blank" style="color:#dc2626;font-weight:bold;">ดูคำแนะนำ →</a></div>`;
+      } else if (data.disputeAlert) {
+        res.innerHTML = `<div style="background:#fef2f2;border:1px solid #fecaca;padding:10px;border-radius:8px;color:#991b1b;">⚠️ <b>${data.notice}</b><br><a href="${apiHost}/scammed.html" target="_blank" style="color:#dc2626;font-weight:bold;">ดูคำแนะนำ →</a></div>`;
       } else {
-        res.innerHTML = `<div style="background:#fffbeb;border:1px solid #fde68a;padding:10px;border-radius:8px;color:#92400e;">⚠️ <b>ไม่อยู่ในรายชื่อยืนยัน</b> (เคยมีคนเช็ค ${data.stat?.count || 1} ครั้ง)<br><a href="${apiHost}/check-account.html" target="_blank" style="color:#b45309;">ตรวจประวัติเพิ่มเติม →</a></div>`;
+        res.innerHTML = `<div style="background:#fffbeb;border:1px solid #fde68a;padding:10px;border-radius:8px;color:#92400e;">⚠️ <b>ไม่อยู่ในรายชื่อผู้ขายยืนยัน</b><br><a href="${apiHost}/check-account.html" target="_blank" style="color:#b45309;">ตรวจประวัติเพิ่มเติมใน Google →</a></div>`;
       }
     } catch (e) {
       btn.disabled = false;

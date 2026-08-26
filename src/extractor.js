@@ -1,16 +1,44 @@
 ﻿/**
- * Universal Conversation Extractor
- * แกะข้อมูลทุกอย่างจากแชทข้อความเดียว:
- * - เลขบัญชี (Bank Account)
- * - พร้อมเพย์ (PromptPay)
- * - เบอร์โทรศัพท์ (Phone Numbers)
- * - LINE ID / ลิงก์ LINE
- * - เพจ / URL (Facebook, Web)
- * - ชื่อบัญชี / คำบ่งชี้ธนาคาร
+ * Universal Conversation Extractor (Privacy-First & Hashed)
+ * 
+ * ความเป็นส่วนตัวตาม PDPA:
+ * - ทุก Entity จะถูกแฮชทางเดียวด้วย HMAC-SHA256 + Secret Salt
+ * - label ที่แสดงผลจะถูกเซ็นเซอร์ (Masked) เหลือเฉพาะ 3-4 ตัวท้าย
+ * - ไม่มีข้อมูลเลขบัญชีหรือเบอร์โทรจริงถูกจัดเก็บในฐานข้อมูล
  */
+
+const crypto = require('crypto');
+const { getSalt } = require('./sightings');
 
 function cleanDigits(s) {
   return String(s || '').replace(/\D/g, '');
+}
+
+function hashEntity(type, rawVal) {
+  const norm = String(rawVal || '').trim().toLowerCase();
+  const hash = crypto.createHmac('sha256', getSalt()).update(`${type}:${norm}`).digest('hex').slice(0, 32);
+  return `${type}:${hash}`;
+}
+
+function maskDigits(digits) {
+  const d = String(digits || '');
+  if (d.length <= 4) return `***${d}`;
+  return `***-***-${d.slice(-4)}`;
+}
+
+function maskLine(lineId) {
+  const l = String(lineId || '');
+  if (l.length <= 4) return '@***';
+  return `${l.slice(0, 3)}***`;
+}
+
+function maskUrl(url) {
+  try {
+    const u = new URL(url.startsWith('http') ? url : `https://${url}`);
+    return `${u.hostname}/***`;
+  } catch (e) {
+    return 'link/***';
+  }
 }
 
 // 1. ดึงเลขบัญชีธนาคาร (10-12 หลัก และ 8-9 หลัก)
@@ -18,25 +46,32 @@ function extractBankAccounts(text) {
   const t = String(text || '');
   const matches = [];
 
-  // รูปแบบที่มีขีด เช่น 123-4-56789-0 หรือ 123-456789-0
   const hyphenPattern = /\b\d{3}[-\s]\d{1}[-\s]\d{5}[-\s]\d{1}\b|\b\d{3}[-\s]\d{6}[-\s]\d{1}\b|\b\d{3}[-\s]\d{3}[-\s]\d{4}\b/g;
   let m;
   while ((m = hyphenPattern.exec(t)) !== null) {
     const raw = m[0];
     const digits = cleanDigits(raw);
-    if (digits.length >= 8 && digits.length <= 15) {
-      matches.push({ type: 'account', raw, digits, key: `acc:${digits}` });
+    if (digits.length >= 8 && digits.length <= 15 && !matches.some((x) => x.digits === digits)) {
+      matches.push({
+        type: 'account',
+        digits, // ใช้เฉพาะใน session ตอบกลับตอนนั้น ไม่บันทึกลง disk
+        label: maskDigits(digits),
+        key: hashEntity('account', digits),
+      });
     }
   }
 
-  // รูปแบบเลขติดกัน 10-12 หลัก
   const pureDigitsPattern = /(?<!\d)(\d{10,12})(?!\d)/g;
   while ((m = pureDigitsPattern.exec(t)) !== null) {
     const raw = m[1];
-    // ถ้าไม่ใช่เบอร์มือถือขึ้นต้นด้วย 08, 09, 06 (เบอร์มือถือ 10 หลักจะแยกไปอีกหมวด)
     if (!/^(06|08|09)\d{8}$/.test(raw)) {
       if (!matches.some((x) => x.digits === raw)) {
-        matches.push({ type: 'account', raw, digits: raw, key: `acc:${raw}` });
+        matches.push({
+          type: 'account',
+          digits: raw,
+          label: maskDigits(raw),
+          key: hashEntity('account', raw),
+        });
       }
     }
   }
@@ -54,7 +89,12 @@ function extractPhoneNumbers(text) {
     const raw = m[1];
     const digits = cleanDigits(raw);
     if ((digits.length === 9 || digits.length === 10) && !matches.some((x) => x.digits === digits)) {
-      matches.push({ type: 'phone', raw, digits, key: `phone:${digits}` });
+      matches.push({
+        type: 'phone',
+        digits,
+        label: maskDigits(digits),
+        key: hashEntity('phone', digits),
+      });
     }
   }
   return matches;
@@ -65,23 +105,31 @@ function extractLineIds(text) {
   const t = String(text || '');
   const matches = [];
 
-  // @username หรือ line id: xxx
   const linePattern = /(?:line(?:\s*id)?|ไลน์)?\s*[:=\s]?\s*(@[a-zA-Z0-9._-]+)\b|(?:line(?:\s*id)?|ไลน์)\s*[:=]\s*([a-zA-Z0-9._-]{3,30})\b/gi;
   let m;
   while ((m = linePattern.exec(t)) !== null) {
     const val = (m[1] || m[2] || '').trim().toLowerCase();
     if (val && val !== '@line' && !matches.some((x) => x.val === val)) {
       const cleanVal = val.startsWith('@') ? val : `@${val}`;
-      matches.push({ type: 'line', raw: val, val: cleanVal, key: `line:${cleanVal}` });
+      matches.push({
+        type: 'line',
+        val: cleanVal,
+        label: maskLine(cleanVal),
+        key: hashEntity('line', cleanVal),
+      });
     }
   }
 
-  // line.me/ti/p/...
   const lineUrlPattern = /line\.me\/R\/ti\/p\/([@%a-zA-Z0-9._-]+)/gi;
   while ((m = lineUrlPattern.exec(t)) !== null) {
     const id = decodeURIComponent(m[1]).toLowerCase();
     if (!matches.some((x) => x.val === id)) {
-      matches.push({ type: 'line', raw: m[0], val: id, key: `line:${id}` });
+      matches.push({
+        type: 'line',
+        val: id,
+        label: maskLine(id),
+        key: hashEntity('line', id),
+      });
     }
   }
 
@@ -97,7 +145,12 @@ function extractUrls(text) {
   while ((m = urlPattern.exec(t)) !== null) {
     let url = m[1].replace(/[.,;!?)]+$/, '');
     if (!matches.some((x) => x.url === url)) {
-      matches.push({ type: 'url', url, key: `url:${url.toLowerCase()}` });
+      matches.push({
+        type: 'url',
+        url,
+        label: maskUrl(url),
+        key: hashEntity('url', url.toLowerCase()),
+      });
     }
   }
   return matches;
@@ -112,15 +165,17 @@ function extractPromptPay(text) {
   while ((m = ppPattern.exec(t)) !== null) {
     const digits = cleanDigits(m[1]);
     if (!matches.some((x) => x.digits === digits)) {
-      matches.push({ type: 'promptpay', digits, key: `pp:${digits}` });
+      matches.push({
+        type: 'promptpay',
+        digits,
+        label: maskDigits(digits),
+        key: hashEntity('promptpay', digits),
+      });
     }
   }
   return matches;
 }
 
-/**
- * รวมพลังแกะทุกสิ่งจากข้อความแชท
- */
 function extractAllEntities(text) {
   const accounts = extractBankAccounts(text);
   const phones = extractPhoneNumbers(text);
@@ -155,4 +210,5 @@ module.exports = {
   extractUrls,
   extractPromptPay,
   extractAllEntities,
+  hashEntity,
 };

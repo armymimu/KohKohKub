@@ -1,9 +1,11 @@
 ﻿/**
- * Identity Graph Engine (กราฟเชื่อมโยงตัวตนมิจฉาชีพ)
+ * Identity Graph Engine (Privacy-Preserving & Moderated)
  * 
- * กฎเหล็ก:
- * - ทุกสิ่งที่พบในแชทข้อความเดียวกัน = มีความเชื่อมโยงกัน (Co-occurrence Edge)
- * - เมื่อบัญชีหนึ่งถูกตรวจพบว่ามีประวัติเสี่ยง หรือมีการรายงาน -> ความเสี่ยงจะส่งต่อไปยัง เบอร์โทร / LINE / เพจ / บัญชีอื่นๆ ที่ผูกกันทันที
+ * กฎความปลอดภัย & ความเป็นส่วนตัว:
+ * 1. ทุก Entity Key คือ Hash ทางเดียว ไม่เก็บเลขบัญชี/เบอร์โทรจริง
+ * 2. Label เก็บเฉพาะตัวเลขที่ Mask แล้ว (เช่น ***-***-1234)
+ * 3. รายงานข้อพิพาท (Scam Reports) จะอยู่ในสถานะ Pending (รอตรวจ) เสมอ และไม่มีผลต่อคะแนนความเสี่ยงจนกว่าแอดมินจะตรวจสอบและอนุมัติ
+ * 4. ไม่มีการชี้ตัวว่าเป็นมิจฉาชีพ ใช้คำว่า "มีผู้แจ้งข้อพิพาทเข้ามา"
  */
 
 const { pool, isPostgres } = require('./postgres');
@@ -13,11 +15,13 @@ const path = require('path');
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const GRAPH_FILE = path.join(DATA_DIR, 'graph.json');
 
-// Local fallback store
-let localGraph = { entities: {}, edges: {} };
+let localGraph = { entities: {}, edges: {}, reports: [] };
 if (fs.existsSync(GRAPH_FILE)) {
   try {
     localGraph = JSON.parse(fs.readFileSync(GRAPH_FILE, 'utf8'));
+    if (!localGraph.entities) localGraph.entities = {};
+    if (!localGraph.edges) localGraph.edges = {};
+    if (!localGraph.reports) localGraph.reports = [];
   } catch (e) {}
 }
 
@@ -27,7 +31,7 @@ function persistLocal() {
 }
 
 /**
- * บันทึก Entities และสร้างความเชื่อมโยง (Edges) ระหว่างกัน
+ * บันทึก Entities และ Edges (เฉพาะจากแหล่งที่เชื่อถือได้ เช่น LINE Webhook)
  */
 async function recordEntitiesAndEdges(entitiesList) {
   if (!entitiesList || entitiesList.length === 0) return;
@@ -38,11 +42,10 @@ async function recordEntitiesAndEdges(entitiesList) {
     try {
       await client.query('BEGIN');
 
-      // 1. Upsert Entities
       for (const ent of entitiesList) {
         const key = ent.key;
         const type = ent.type;
-        const label = ent.digits || ent.val || ent.url || ent.raw || key;
+        const label = ent.label || '***';
 
         await client.query(
           `INSERT INTO entities (entity_key, entity_type, label, query_count, first_seen, last_seen)
@@ -54,14 +57,12 @@ async function recordEntitiesAndEdges(entitiesList) {
         );
       }
 
-      // 2. Upsert Undirected Edges (เชื่อมโยงแบบไขว้กันทุกคู่)
       for (let i = 0; i < entitiesList.length; i++) {
         for (let j = i + 1; j < entitiesList.length; j++) {
           const k1 = entitiesList[i].key;
           const k2 = entitiesList[j].key;
           if (k1 === k2) continue;
 
-          // ใส่ทั้ง 2 ทิศทางเพื่อให้ค้นหาง่าย
           const pairs = [
             [k1, k2],
             [k2, k1],
@@ -95,9 +96,10 @@ async function recordEntitiesAndEdges(entitiesList) {
         localGraph.entities[key] = {
           key,
           type: ent.type,
-          label: ent.digits || ent.val || ent.url || key,
+          label: ent.label || '***',
           queryCount: 0,
-          reportsCount: 0,
+          verifiedReportsCount: 0,
+          pendingReportsCount: 0,
           firstSeen: now,
           lastSeen: now,
         };
@@ -123,32 +125,30 @@ async function recordEntitiesAndEdges(entitiesList) {
 }
 
 /**
- * สำรวจกราฟ: ดึงเพื่อนบ้านและตัวตนที่เชื่อมโยง (Connected Network)
+ * สำรวจกราฟ (Read-Only)
  */
 async function inspectNetwork(entityKeys) {
   if (!entityKeys || entityKeys.length === 0) {
-    return { directEntities: [], connectedEntities: [], hasRiskPropagation: false, networkRiskScore: 0 };
+    return { directEntities: [], connectedEntities: [], verifiedReports: 0, pendingReports: 0, networkSummary: [] };
   }
 
   const results = {
     directEntities: [],
     connectedEntities: [],
-    hasRiskPropagation: false,
-    maxReports: 0,
-    maxQueryCount: 0,
+    verifiedReports: 0,
+    pendingReports: 0,
     networkSummary: [],
+    maxQueryCount: 0,
   };
 
   if (isPostgres()) {
     try {
-      // ดึงข้อมูล Direct Entities
       const directRes = await pool.query(
         'SELECT * FROM entities WHERE entity_key = ANY($1)',
         [entityKeys]
       );
       results.directEntities = directRes.rows;
 
-      // ดึง Connected Entities (ผ่าน Edge)
       const edgeRes = await pool.query(
         `SELECT e.*, ee.occurrences 
          FROM entity_edges ee
@@ -161,10 +161,8 @@ async function inspectNetwork(entityKeys) {
       console.error('[graph] inspectNetwork error:', err);
     }
   } else {
-    // Local fallback
     for (const k of entityKeys) {
       if (localGraph.entities[k]) results.directEntities.push(localGraph.entities[k]);
-      // ค้นหา connected
       for (const [edgeKey, count] of Object.entries(localGraph.edges)) {
         const [src, tgt] = edgeKey.split('->');
         if (src === k && !entityKeys.includes(tgt) && localGraph.entities[tgt]) {
@@ -174,18 +172,15 @@ async function inspectNetwork(entityKeys) {
     }
   }
 
-  // ประเมินความเสี่ยงและส่งต่อความเสี่ยง (Risk Propagation)
   const allNodes = [...results.directEntities, ...results.connectedEntities];
   for (const node of allNodes) {
     const qCount = node.query_count || node.queryCount || 0;
-    const rCount = node.scam_reports_count || node.reportsCount || 0;
+    const vCount = node.verified_reports_count || node.verifiedReportsCount || 0;
+    const pCount = node.pending_reports_count || node.pendingReportsCount || 0;
 
     if (qCount > results.maxQueryCount) results.maxQueryCount = qCount;
-    if (rCount > results.maxReports) results.maxReports = rCount;
-
-    if (rCount > 0) {
-      results.hasRiskPropagation = true;
-    }
+    results.verifiedReports += vCount;
+    results.pendingReports += pCount;
   }
 
   if (results.connectedEntities.length > 0) {
@@ -193,39 +188,50 @@ async function inspectNetwork(entityKeys) {
     const phones = results.connectedEntities.filter((x) => (x.entity_type || x.type) === 'phone');
     const otherAccs = results.connectedEntities.filter((x) => (x.entity_type || x.type) === 'account');
 
-    if (lines.length > 0) results.networkSummary.push(`ผูกกับ LINE ID: ${lines.map((l) => l.label).join(', ')}`);
-    if (phones.length > 0) results.networkSummary.push(`ผูกกับเบอร์โทร: ${phones.map((p) => p.label).join(', ')}`);
-    if (otherAccs.length > 0) results.networkSummary.push(`เคยพบร่วมกับบัญชีอื่นอีก ${otherAccs.length} บัญชี`);
+    if (lines.length > 0) results.networkSummary.push(`พบความเชื่อมโยงกับ LINE: ${lines.map((l) => l.label).join(', ')}`);
+    if (phones.length > 0) results.networkSummary.push(`พบความเชื่อมโยงกับเบอร์: ${phones.map((p) => p.label).join(', ')}`);
+    if (otherAccs.length > 0) results.networkSummary.push(`เคยพบร่วมกับบัญชีอื่นอีก ${otherAccs.length} รายการ`);
   }
 
   return results;
 }
 
 /**
- * แจ้งเคสโดนโกงจริง (Scam Report)
+ * ผู้ใช้แจ้งข้อพิพาทเข้ามา (เข้าสู่คิวรอตรวจเสมอ — ยังไม่มีผลกับกราฟทันที)
  */
-async function submitScamReport(entityKeys, category, details, ip) {
+async function submitPendingReport(entityKeys, category, details, contact, ip) {
   const now = new Date().toISOString();
   if (isPostgres()) {
     try {
       await pool.query(
-        'INSERT INTO scam_reports (entity_keys, category, details, ip_hash, created_at) VALUES ($1, $2, $3, $4, $5)',
-        [JSON.stringify(entityKeys), category, details, ip || null, now]
+        `INSERT INTO scam_reports (entity_keys, category, details, ip_hash, verified, created_at)
+         VALUES ($1, $2, $3, $4, false, $5)`,
+        [JSON.stringify(entityKeys), category, `${details || ''} [ติดต่อ: ${contact || '-'}]`, ip || null, now]
       );
-      // เพิ่มรายงานความเสี่ยงใน Entities
+      // นับ pending ไว้เฉยๆ
       await pool.query(
-        'UPDATE entities SET scam_reports_count = scam_reports_count + 1 WHERE entity_key = ANY($1)',
+        `UPDATE entities SET pending_reports_count = COALESCE(pending_reports_count, 0) + 1 WHERE entity_key = ANY($1)`,
         [entityKeys]
-      );
+      ).catch(() => {});
       return true;
     } catch (err) {
       console.error('[graph] report error:', err);
       return false;
     }
   } else {
+    localGraph.reports.push({
+      id: Date.now(),
+      entityKeys,
+      category,
+      details,
+      contact,
+      ip,
+      verified: false,
+      createdAt: now,
+    });
     for (const k of entityKeys) {
       if (localGraph.entities[k]) {
-        localGraph.entities[k].reportsCount = (localGraph.entities[k].reportsCount || 0) + 1;
+        localGraph.entities[k].pendingReportsCount = (localGraph.entities[k].pendingReportsCount || 0) + 1;
       }
     }
     persistLocal();
@@ -234,14 +240,62 @@ async function submitScamReport(entityKeys, category, details, ip) {
 }
 
 /**
- * ดึงสถิติกราฟรวมสำหรับหน้า /stats
+ * แอดมินตรวจสอบหลักฐานและอนุมัติรายงาน (เฉพาะเมื่อผ่านการตรวจแล้วเท่านั้น)
  */
+async function approveReport(reportId) {
+  if (isPostgres()) {
+    try {
+      const res = await pool.query('SELECT * FROM scam_reports WHERE id = $1', [reportId]);
+      if (res.rows.length === 0) return false;
+      const report = res.rows[0];
+      const keys = typeof report.entity_keys === 'string' ? JSON.parse(report.entity_keys) : report.entity_keys;
+
+      await pool.query('UPDATE scam_reports SET verified = true WHERE id = $1', [reportId]);
+      await pool.query(
+        'UPDATE entities SET verified_reports_count = COALESCE(verified_reports_count, 0) + 1 WHERE entity_key = ANY($1)',
+        [keys]
+      );
+      return true;
+    } catch (err) {
+      console.error('[graph] approveReport error:', err);
+      return false;
+    }
+  } else {
+    const report = localGraph.reports.find((r) => r.id === Number(reportId));
+    if (!report) return false;
+    report.verified = true;
+    for (const k of report.entityKeys) {
+      if (localGraph.entities[k]) {
+        localGraph.entities[k].verifiedReportsCount = (localGraph.entities[k].verifiedReportsCount || 0) + 1;
+      }
+    }
+    persistLocal();
+    return true;
+  }
+}
+
+/**
+ * ดึงรายการรายงานที่รอแอดมินตรวจสอบ
+ */
+async function getPendingReports() {
+  if (isPostgres()) {
+    try {
+      const res = await pool.query('SELECT * FROM scam_reports WHERE verified = false ORDER BY id DESC LIMIT 50');
+      return res.rows;
+    } catch (e) {
+      return [];
+    }
+  } else {
+    return localGraph.reports.filter((r) => !r.verified);
+  }
+}
+
 async function getGraphStats() {
   if (isPostgres()) {
     try {
       const entRes = await pool.query('SELECT COUNT(*) FROM entities');
       const edgeRes = await pool.query('SELECT COUNT(*) FROM entity_edges');
-      const repRes = await pool.query('SELECT COUNT(*) FROM scam_reports');
+      const repRes = await pool.query('SELECT COUNT(*) FROM scam_reports WHERE verified = true');
       return {
         totalEntities: parseInt(entRes.rows[0].count, 10),
         totalEdges: parseInt(edgeRes.rows[0].count, 10),
@@ -254,7 +308,7 @@ async function getGraphStats() {
     return {
       totalEntities: Object.keys(localGraph.entities).length,
       totalEdges: Object.keys(localGraph.edges).length,
-      totalReports: 0,
+      totalReports: localGraph.reports.filter((r) => r.verified).length,
     };
   }
 }
@@ -262,6 +316,8 @@ async function getGraphStats() {
 module.exports = {
   recordEntitiesAndEdges,
   inspectNetwork,
-  submitScamReport,
+  submitPendingReport,
+  approveReport,
+  getPendingReports,
   getGraphStats,
 };

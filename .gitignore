@@ -1,7 +1,5 @@
-node_modules/
+﻿node_modules/
 .env
-data/db.json
-data/sightings.json
-data/salt.txt
+data/
 *.log
 .DS_Store

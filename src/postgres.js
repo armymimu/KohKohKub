@@ -70,7 +70,8 @@ async function initPostgres() {
         entity_type VARCHAR(50) NOT NULL,
         label VARCHAR(255),
         query_count INTEGER NOT NULL DEFAULT 1,
-        scam_reports_count INTEGER NOT NULL DEFAULT 0,
+        verified_reports_count INTEGER NOT NULL DEFAULT 0,
+        pending_reports_count INTEGER NOT NULL DEFAULT 0,
         first_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -90,9 +91,17 @@ async function initPostgres() {
         category VARCHAR(100) NOT NULL,
         details TEXT,
         ip_hash VARCHAR(64),
+        verified BOOLEAN DEFAULT false,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Add columns if table already existed without them
+    await client.query(`
+      ALTER TABLE entities ADD COLUMN IF NOT EXISTS verified_reports_count INTEGER DEFAULT 0;
+      ALTER TABLE entities ADD COLUMN IF NOT EXISTS pending_reports_count INTEGER DEFAULT 0;
+      ALTER TABLE scam_reports ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT false;
+    `).catch(() => {});
 
     // Seed accommodations if table is empty
     const checkSeed = await client.query('SELECT COUNT(*) FROM accommodations');

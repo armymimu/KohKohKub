@@ -1,21 +1,13 @@
 ﻿/**
- * LINE Flex Message Builder
- * สร้างการ์ดผลการตรวจสอบที่สวยงาม พร้อมปุ่มกดแชร์ต่อให้เพื่อน
+ * LINE Flex Message Builder (Professional & Legally Safe)
  */
 
 const config = require('./config');
 
 function getShareUrl(text) {
   const base = config.baseUrl || 'https://kohkohkub-production.up.railway.app';
-  const shareText = `${text}\n👉 ตรวจสอบเลขบัญชีก่อนโอนได้ที่ ${base}`;
+  const shareText = `${text}\n👉 ตรวจสอบข้อมูลก่อนโอนได้ที่ ${base}`;
   return `https://line.me/R/msg/text/?${encodeURIComponent(shareText)}`;
-}
-
-function getAddBotUrl() {
-  if (config.lineOaId) {
-    return `https://line.me/R/ti/p/${encodeURIComponent(config.lineOaId)}`;
-  }
-  return config.baseUrl || 'https://kohkohkub-production.up.railway.app';
 }
 
 /**
@@ -45,7 +37,6 @@ function buildVerifiedFlex(rec, stat) {
 
   contents.push({ type: 'separator', margin: 'md' });
 
-  // Bank Info Box
   contents.push({
     type: 'box',
     layout: 'vertical',
@@ -93,7 +84,7 @@ function buildVerifiedFlex(rec, stat) {
 
   contents.push({
     type: 'text',
-    text: '⚠️ โอนเข้าบัญชีที่ระบุข้างต้นเท่านั้น หากชื่อ/เลขไม่ตรง อย่าโอนเด็ดขาด',
+    text: '⚠️ ตรวจสอบชื่อและเลขบัญชีให้ตรงกันทุกตัวอักษร หากไม่ตรงอย่าโอนเด็ดขาด',
     size: 'xxs',
     color: '#dc2626',
     wrap: true,
@@ -164,16 +155,16 @@ function buildVerifiedFlex(rec, stat) {
 }
 
 /**
- * การ์ดสีแดง: แจ้งเตือนความเสี่ยง / สแกม / บัญชีอันตราย (Warning)
+ * การ์ดสีแดง/ส้ม: แจ้งเตือนข้อควรระวัง / ข้อพิพาท / รูปแบบที่มีความเสี่ยง
  */
 function buildWarningFlex(title, subtitle, detailsText, account = '') {
   const shareText = account
-    ? `🚨 เตือนภัย! ระวังเลขบัญชี ${account} ตรวจพบความเสี่ยง`
-    : `🚨 เตือนภัยมิจฉาชีพ: ${title}`;
+    ? `⚠️ โปรดระวัง! พบข้อควรระวังสำหรับข้อมูล ${account}`
+    : `⚠️ ข้อควรระวังก่อนโอนเงิน: ${title}`;
 
   return {
     type: 'flex',
-    altText: `🚨 เตือนภัย: ${title}`,
+    altText: `⚠️ ข้อควรระวัง: ${title}`,
     contents: {
       type: 'bubble',
       size: 'mega',
@@ -186,7 +177,7 @@ function buildWarningFlex(title, subtitle, detailsText, account = '') {
         contents: [
           {
             type: 'text',
-            text: '🛑 ตรวจพบความเสี่ยง / สัญญาณอันตราย',
+            text: '🛑 ข้อควรระวัง / สัญญาณความเสี่ยง',
             weight: 'bold',
             color: '#ffffff',
             size: 'sm',
@@ -232,7 +223,7 @@ function buildWarningFlex(title, subtitle, detailsText, account = '') {
             contents: [
               {
                 type: 'text',
-                text: '💡 ข้อแนะนำ: อย่าเพิ่งโอนเงินเด็ดขาด ตรวจสอบชื่อ-สกุล และค้นหาใน Google เพิ่มเติม',
+                text: '💡 แนะนำ: อย่าเพิ่งโอนเงิน ตรวจสอบชื่อ-สกุล และค้นหาใน Google เพิ่มเติม',
                 size: 'xxs',
                 color: '#b91c1c',
                 wrap: true,
@@ -253,7 +244,7 @@ function buildWarningFlex(title, subtitle, detailsText, account = '') {
             height: 'sm',
             action: {
               type: 'uri',
-              label: '🚨 แชร์เตือนเพื่อนด่วน',
+              label: '📤 ส่งต่อให้เพื่อนช่วยดู',
               uri: getShareUrl(shareText),
             },
           },
@@ -267,9 +258,9 @@ function buildWarningFlex(title, subtitle, detailsText, account = '') {
  * การ์ดสีส้ม: ไม่พบในรายชื่อยืนยัน (Unknown / Caution)
  */
 function buildCautionFlex(account, stat) {
-  let statSummary = 'คุณเป็นคนแรกที่นำเลขนี้มาตรวจสอบ (ยังไม่มีประวัติ)';
+  let statSummary = 'คุณเป็นคนแรกที่นำเลขนี้มาตรวจสอบ (ยังไม่มีประวัติในระบบ)';
   if (stat && stat.count > 1) {
-    statSummary = `เคยมีคนนำเลขนี้มาเช็คแล้ว ${stat.count} ครั้ง`;
+    statSummary = `เคยมีผู้สอบถามข้อมูลนี้แล้ว ${stat.count} ครั้ง`;
   }
 
   const q = encodeURIComponent(`"${account}" โกง OR หลอกลวง`);
@@ -277,7 +268,7 @@ function buildCautionFlex(account, stat) {
 
   return {
     type: 'flex',
-    altText: `⚠️ ผลการตรวจเลขบัญชี ${account}`,
+    altText: `ℹ️ ผลการตรวจเลขบัญชี ${account}`,
     contents: {
       type: 'bubble',
       size: 'mega',
@@ -290,7 +281,7 @@ function buildCautionFlex(account, stat) {
         contents: [
           {
             type: 'text',
-            text: '⚠️ เลขบัญชีไม่อยู่ในรายชื่อยืนยัน',
+            text: '⚠️ ไม่อยู่ในรายชื่อผู้ขายยืนยัน',
             weight: 'bold',
             color: '#ffffff',
             size: 'md',
@@ -319,7 +310,7 @@ function buildCautionFlex(account, stat) {
           { type: 'separator', margin: 'md' },
           {
             type: 'text',
-            text: '📌 3 สิ่งที่ต้องทำก่อนโอน:\n1. ขอวิดีโอคอลดูสถานที่หรือสินค้าจริง\n2. ชื่อบัญชีต้องตรงกับชื่อเจ้าของ/ร้าน\n3. กดค้นประวัติใน Google ด้านล่าง',
+            text: '📌 3 สิ่งที่ควรทำก่อนโอน:\n1. ขอวิดีโอคอลดูสถานที่หรือสินค้าจริง\n2. ชื่อบัญชีต้องตรงกับชื่อเจ้าของ/ร้าน\n3. ค้นประวัติใน Google ด้านล่าง',
             size: 'xs',
             wrap: true,
             color: '#334155',
@@ -410,13 +401,13 @@ function buildHelpFlex() {
             contents: [
               { type: 'text', text: '• เลขบัญชีธนาคาร / พร้อมเพย์', size: 'xs', color: '#475569' },
               { type: 'text', text: '• ชื่อที่พัก / ร้านค้า / เพจเฟซบุ๊ก', size: 'xs', color: '#475569' },
-              { type: 'text', text: '• ข้อความชวนลงทุน / ทำงานเสริม', size: 'xs', color: '#475569' },
+              { type: 'text', text: '• ข้อความแชทที่คู่สนทนาส่งมา', size: 'xs', color: '#475569' },
             ],
           },
           { type: 'separator' },
           {
             type: 'text',
-            text: '💡 พิมพ์ "รายการ" เพื่อดูรายชื่อที่พักและผู้ขายที่ผ่านการยืนยันแล้ว',
+            text: '💡 พิมพ์ "รายการ" เพื่อดูรายชื่อที่พักที่ผ่านการยืนยันแล้ว',
             size: 'xxs',
             color: '#0d9488',
             wrap: true,
@@ -436,7 +427,7 @@ function buildHelpFlex() {
             action: {
               type: 'uri',
               label: '📤 แนะนำบอทให้เพื่อน',
-              uri: getShareUrl('🛡️ แนะนำบอทตรวจเลขบัญชีก่อนโอนเงินฟรี ใช้งานผ่าน LINE ได้เลย!'),
+              uri: getShareUrl('🛡️ ตรวจสอบเลขบัญชีก่อนโอนเงินฟรี ใช้งานผ่าน LINE ได้เลย!'),
             },
           },
         ],
