@@ -188,24 +188,7 @@ app.get('/sitemap.xml', (req, res) => {
   );
 });
 
-async function pingSearchEngines() {
-  const base = appConfig.baseUrl;
-  if (!base || base.includes('localhost')) return;
-  const sitemapUrl = `${base}/sitemap.xml`;
-  const pings = [
-    `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
-    `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
-  ];
 
-  for (const url of pings) {
-    try {
-      const https = require('https');
-      https.get(url, (r) => {
-        console.log(`[seo] แจ้งเตือน Search Engine (${url.includes('google') ? 'Google' : 'Bing'}): status ${r.statusCode}`);
-      }).on('error', () => {});
-    } catch (e) {}
-  }
-}
 
 app.get('/site-config', async (req, res) => {
   const id = appConfig.lineOaId;
@@ -427,5 +410,4 @@ app.listen(PORT, async () => {
   console.log(`    ฐานข้อมูล: ${isPg ? '✅ PostgreSQL (ถาวร)' : '⚠️ Local JSON (ข้อมูลจะหายเมื่อรีสตาร์ท)'}`);
   console.log(`    Salt ความจำ: ${saltSource === 'env' ? '✅ SIGHTING_SALT จาก .env' : '⚠️ สุ่มใหม่ในเครื่อง (ควรตั้ง SIGHTING_SALT บน Railway)'}`);
   console.log(`    ที่พักในฐานข้อมูล: ${db.all().length} รายการ (ยืนยันแล้ว ${db.verified().length})`);
-  await pingSearchEngines();
 });
