@@ -145,7 +145,7 @@ app.get('/health', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// SEO & Static Pages
+// SEO: บอก Google ว่ามีหน้าอะไรบ้าง และระบบ Auto-Ping
 // ---------------------------------------------------------------------------
 const PUBLIC_PAGES = [
   '/',
@@ -164,6 +164,11 @@ const PUBLIC_PAGES = [
   '/register.html',
 ];
 
+// ยืนยันความเป็นเจ้าของ Google Search Console อัตโนมัติทุกรูปแบบ (HTML File หรือ Meta tag)
+app.get('/google:code.html', (req, res) => {
+  res.type('text/html').send(`google-site-verification: google${req.params.code}.html`);
+});
+
 app.get('/stats', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'stats.html'));
 });
@@ -179,12 +184,31 @@ app.get('/sitemap.xml', (req, res) => {
   const base = appConfig.baseUrl || `${req.protocol}://${req.get('host')}`;
   const today = new Date().toISOString().slice(0, 10);
   const urls = PUBLIC_PAGES.map(
-    (p) => `  <url><loc>${base}${p}</loc><lastmod>${today}</lastmod></url>`
+    (p) => `  <url><loc>${base}${p}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`
   ).join('\n');
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`
   );
 });
+
+async function pingSearchEngines() {
+  const base = appConfig.baseUrl;
+  if (!base || base.includes('localhost')) return;
+  const sitemapUrl = `${base}/sitemap.xml`;
+  const pings = [
+    `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+    `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+  ];
+
+  for (const url of pings) {
+    try {
+      const https = require('https');
+      https.get(url, (r) => {
+        console.log(`[seo] แจ้งเตือน Search Engine (${url.includes('google') ? 'Google' : 'Bing'}): status ${r.statusCode}`);
+      }).on('error', () => {});
+    } catch (e) {}
+  }
+}
 
 app.get('/site-config', async (req, res) => {
   const id = appConfig.lineOaId;
@@ -406,4 +430,5 @@ app.listen(PORT, async () => {
   console.log(`    ฐานข้อมูล: ${isPg ? '✅ PostgreSQL (ถาวร)' : '⚠️ Local JSON (ข้อมูลจะหายเมื่อรีสตาร์ท)'}`);
   console.log(`    Salt ความจำ: ${saltSource === 'env' ? '✅ SIGHTING_SALT จาก .env' : '⚠️ สุ่มใหม่ในเครื่อง (ควรตั้ง SIGHTING_SALT บน Railway)'}`);
   console.log(`    ที่พักในฐานข้อมูล: ${db.all().length} รายการ (ยืนยันแล้ว ${db.verified().length})`);
+  await pingSearchEngines();
 });
