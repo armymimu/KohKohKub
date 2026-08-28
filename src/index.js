@@ -432,6 +432,58 @@ app.patch('/admin/verify/:id', requireAdminKey, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Auto-Alert & RSS Feed for Twitter/X, Telegram & Social Automations
+// ---------------------------------------------------------------------------
+const { generateAlertContent, broadcastTelegram } = require('./alertBot');
+
+app.get('/api/alerts/latest', async (req, res) => {
+  const alert = await generateAlertContent();
+  res.json({ ok: true, alert: alert.text, topic: alert.topic.topic });
+});
+
+app.get('/feed.xml', async (req, res) => {
+  const base = appConfig.baseUrl || `${req.protocol}://${req.get('host')}`;
+  const alert = await generateAlertContent();
+  const date = new Date().toUTCString();
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Safeโอน — ระบบเตือนภัยมิจฉาชีพออนไลน์และเช็คเลขบัญชี</title>
+    <link>${base}</link>
+    <description>อัปเดตกลโกงมิจฉาชีพออนไลน์และสถิติความปลอดภัยแบบเรียลไทม์</description>
+    <language>th-TH</language>
+    <lastBuildDate>${date}</lastBuildDate>
+    <atom:link href="${base}/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>${alert.topic.topic} (${new Date().toLocaleDateString('th-TH')})</title>
+      <link>${base}</link>
+      <guid>${base}/feed/${Date.now()}</guid>
+      <pubDate>${date}</pubDate>
+      <description><![CDATA[${alert.text.replace(/\n/g, '<br/>')}]]></description>
+    </item>
+  </channel>
+</rss>`;
+  res.type('application/xml').send(xml);
+});
+
+app.all('/api/cron/broadcast', async (req, res) => {
+  const secret = req.query.secret || req.headers['x-cron-secret'];
+  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ ok: false, error: 'unauthorized' });
+  }
+
+  const alert = await generateAlertContent();
+  const telegramRes = await broadcastTelegram(alert.text);
+
+  res.json({
+    ok: true,
+    broadcastedAt: new Date().toISOString(),
+    telegram: telegramRes,
+    preview: alert.text,
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Server Startup & DB Sync
 // ---------------------------------------------------------------------------
 app.listen(PORT, async () => {
